@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Recorder</title>
+    <title>Glassmorphic Video Recorder</title>
     <style>
         * {
             margin: 0;
@@ -31,6 +31,80 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: all 0.3s ease;
+        }
+
+        .video-container.portrait {
+            width: 56.25vh; /* 9/16 aspect ratio */
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 2px solid rgba(255, 255, 255, 0.3);
+            border-right: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .video-container.landscape {
+            width: 100vw;
+            height: 56.25vw; /* 9/16 aspect ratio */
+            max-height: 100vh;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .video-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .video-mask.portrait::before,
+        .video-mask.portrait::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .video-mask.portrait::before {
+            left: 0;
+            right: 56.25vh;
+            right: calc(50% + 28.125vh);
+        }
+
+        .video-mask.portrait::after {
+            right: 0;
+            left: 56.25vh;
+            left: calc(50% + 28.125vh);
+        }
+
+        .video-mask.landscape::before,
+        .video-mask.landscape::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .video-mask.landscape::before {
+            top: 0;
+            bottom: calc(50% + 28.125vw);
+        }
+
+        .video-mask.landscape::after {
+            bottom: 0;
+            top: calc(50% + 28.125vw);
         }
 
         .controls-overlay {
@@ -431,8 +505,9 @@
     </style>
 </head>
 <body>
-    <div class="video-container">
+    <div class="video-container" id="videoContainer">
         <video id="videoElement" autoplay muted playsinline></video>
+        <div class="video-mask" id="videoMask"></div>
     </div>
 
     <div class="controls-overlay">
@@ -480,6 +555,8 @@
         let currentAspect = 'landscape';
 
         const videoElement = document.getElementById('videoElement');
+        const videoContainer = document.getElementById('videoContainer');
+        const videoMask = document.getElementById('videoMask');
         const recordButton = document.getElementById('recordButton');
         const statusIndicator = document.getElementById('statusIndicator');
         const timeDisplay = document.getElementById('timeDisplay');
@@ -556,7 +633,7 @@
                 mimeType: currentFormat === 'webm' 
                     ? 'video/webm;codecs=vp9,opus' 
                     : 'video/mp4;codecs=h264,aac',
-                videoBitsPerSecond: 85000000, // 85 Mbps for high quality
+                videoBitsPerSecond: 8000000, // 8 Mbps for high quality
                 audioBitsPerSecond: 128000   // 128 kbps for audio
             };
 
@@ -641,7 +718,7 @@
             const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
             
             a.href = url;
-            a.download = `recording_1440p_${timestamp}.${currentFormat}`;
+            a.download = `recording_${currentAspect}_${canvas?.width || 'full'}x${canvas?.height || 'res'}_${timestamp}.${currentFormat}`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -667,19 +744,16 @@
         function setAspectRatio(aspect) {
             currentAspect = aspect;
             
-            // Visual feedback only - actual recording maintains full resolution
-            if (aspect === 'portrait') {
-                videoElement.style.objectFit = 'cover';
-                videoElement.style.objectPosition = 'center';
-            } else {
-                videoElement.style.objectFit = 'cover';
-                videoElement.style.objectPosition = 'center';
-            }
+            // Update video container and mask classes
+            videoContainer.className = `video-container ${aspect}`;
+            videoMask.className = `video-mask ${aspect}`;
             
+            // Update active button
             document.querySelectorAll('.aspect-controls .radio-button').forEach(btn => {
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
+            
             showStatus(`Aspect: ${aspect === 'landscape' ? '16:9' : '9:16'}`);
         }
 
