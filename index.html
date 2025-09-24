@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Glassmorphic Video Recorder</title>
+    <title>Video Recorder</title>
     <style>
         * {
             margin: 0;
@@ -53,7 +53,7 @@
             color: white;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             overflow: hidden;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
@@ -66,7 +66,7 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.5s;
+            transition: left 0.5s ease;
         }
 
         .floating-control:hover::before {
@@ -79,12 +79,17 @@
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
         }
 
+        .floating-control:active {
+            transform: translateY(0px) scale(0.98);
+            transition: all 0.1s ease;
+        }
+
         .record-button {
             bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.12);
             backdrop-filter: blur(25px);
@@ -92,38 +97,57 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
+            position: fixed;
             overflow: visible;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .record-button::after {
             content: '';
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             background: white;
             border-radius: 50%;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .record-button:hover {
+            transform: translateX(-50%) scale(1.1);
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .record-button:active {
+            transform: translateX(-50%) scale(1.05);
+        }
+
+        .record-button.recording {
+            background: rgba(220, 38, 127, 0.2);
+            border-color: rgba(220, 38, 127, 0.4);
+            animation: pulseRecord 2s infinite;
         }
 
         .record-button.recording::after {
             border-radius: 6px;
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
+            background: #dc267f;
         }
 
-        .record-button.recording {
-            animation: pulse 2s infinite;
+        .record-button.recording:hover {
+            transform: translateX(-50%) scale(1.1);
         }
 
-        @keyframes pulse {
+        @keyframes pulseRecord {
             0% {
-                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+                box-shadow: 0 0 0 0 rgba(220, 38, 127, 0.4);
             }
             70% {
-                box-shadow: 0 0 0 40px rgba(255, 255, 255, 0);
+                box-shadow: 0 0 0 20px rgba(220, 38, 127, 0);
             }
             100% {
-                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+                box-shadow: 0 0 0 0 rgba(220, 38, 127, 0);
             }
         }
 
@@ -158,9 +182,14 @@
             padding: 6px 14px;
             color: white;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             font-size: 13px;
             font-weight: 500;
+        }
+
+        .radio-button:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-1px);
         }
 
         .radio-button.active {
@@ -173,24 +202,26 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 25px;
             font-size: 14px;
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             pointer-events: none;
+            z-index: 1001;
         }
 
         .status-indicator.show {
             opacity: 1;
+            transform: translate(-50%, -50%) scale(1.05);
         }
 
         .time-display {
-            bottom: 160px;
+            bottom: 140px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.7);
@@ -203,16 +234,56 @@
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             pointer-events: none;
+            position: fixed;
+            z-index: 999;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .time-display.show {
+            opacity: 1;
         }
 
         .download-button {
-            bottom: 240px;
+            bottom: 140px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 12px 30px;
+            padding: 14px 32px;
             font-size: 15px;
             font-weight: 600;
             display: none;
+            position: fixed;
+            z-index: 1000;
+            background: rgba(40, 167, 69, 0.15);
+            border-color: rgba(40, 167, 69, 0.3);
+            color: #28a745;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .download-button:hover {
+            background: rgba(40, 167, 69, 0.25);
+            transform: translateX(-50%) translateY(-3px);
+            box-shadow: 0 15px 45px rgba(40, 167, 69, 0.2);
+        }
+
+        .download-button:active {
+            transform: translateX(-50%) translateY(-1px) scale(0.98);
+        }
+
+        .download-button.show {
+            display: block;
+            animation: slideUpIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        @keyframes slideUpIn {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0px);
+            }
         }
 
         .label-text {
@@ -238,29 +309,30 @@
             }
 
             .record-button {
-                width: 80px;
-                height: 80px;
+                width: 70px;
+                height: 70px;
+                bottom: 30px;
             }
 
             .record-button::after {
-                width: 26px;
-                height: 26px;
+                width: 24px;
+                height: 24px;
             }
 
             .record-button.recording::after {
-                width: 22px;
-                height: 22px;
+                width: 20px;
+                height: 20px;
             }
 
             .time-display {
-                bottom: 140px;
+                bottom: 120px;
                 padding: 10px 20px;
                 font-size: 16px;
             }
 
             .download-button {
-                bottom: 210px;
-                padding: 10px 25px;
+                bottom: 120px;
+                padding: 12px 28px;
                 font-size: 14px;
             }
 
@@ -289,8 +361,9 @@
             }
 
             .record-button {
-                width: 70px;
-                height: 70px;
+                width: 65px;
+                height: 65px;
+                bottom: 25px;
             }
 
             .record-button::after {
@@ -303,6 +376,18 @@
                 height: 18px;
             }
 
+            .time-display {
+                bottom: 110px;
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+
+            .download-button {
+                bottom: 110px;
+                padding: 10px 24px;
+                font-size: 13px;
+            }
+
             .radio-group {
                 gap: 6px;
             }
@@ -310,6 +395,37 @@
             .radio-button {
                 padding: 4px 10px;
                 font-size: 11px;
+            }
+        }
+
+        /* Add safe area for mobile devices with notches */
+        @supports (padding: max(0px)) {
+            .record-button {
+                bottom: max(40px, env(safe-area-inset-bottom, 40px));
+            }
+
+            .time-display, .download-button {
+                bottom: max(140px, calc(env(safe-area-inset-bottom, 40px) + 100px));
+            }
+
+            @media (max-width: 768px) {
+                .record-button {
+                    bottom: max(30px, env(safe-area-inset-bottom, 30px));
+                }
+
+                .time-display, .download-button {
+                    bottom: max(120px, calc(env(safe-area-inset-bottom, 30px) + 90px));
+                }
+            }
+
+            @media (max-width: 480px) {
+                .record-button {
+                    bottom: max(25px, env(safe-area-inset-bottom, 25px));
+                }
+
+                .time-display, .download-button {
+                    bottom: max(110px, calc(env(safe-area-inset-bottom, 25px) + 85px));
+                }
             }
         }
     </style>
@@ -349,7 +465,7 @@
 
         <!-- Download Button -->
         <div class="floating-control download-button" id="downloadButton" onclick="downloadVideo()">
-            Download Recording
+            📥 Download Recording
         </div>
     </div>
 
@@ -369,22 +485,42 @@
         const timeDisplay = document.getElementById('timeDisplay');
         const downloadButton = document.getElementById('downloadButton');
 
-        // Initialize camera
+        // Initialize camera with 1440p resolution
         async function initCamera() {
             try {
                 const constraints = {
                     video: {
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 },
+                        width: { ideal: 2560, min: 1920 },
+                        height: { ideal: 1440, min: 1080 },
+                        frameRate: { ideal: 30, min: 24 },
                         facingMode: 'user'
                     },
-                    audio: true
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 44100
+                    }
                 };
 
                 stream = await navigator.mediaDevices.getUserMedia(constraints);
                 videoElement.srcObject = stream;
                 
-                showStatus('Camera Ready');
+                // Get the actual video track and log its capabilities
+                const videoTrack = stream.getVideoTracks()[0];
+                const capabilities = videoTrack.getCapabilities();
+                console.log('Video capabilities:', capabilities);
+                
+                // Apply the highest possible constraints
+                await videoTrack.applyConstraints({
+                    width: { ideal: 2560 },
+                    height: { ideal: 1440 },
+                    frameRate: { ideal: 30 }
+                });
+
+                const settings = videoTrack.getSettings();
+                console.log('Applied video settings:', settings);
+                
+                showStatus(`Camera Ready (${settings.width}x${settings.height})`);
             } catch (error) {
                 console.error('Error accessing camera:', error);
                 showStatus('Camera Access Denied');
@@ -415,16 +551,27 @@
 
             recordedChunks = [];
             
-            const mimeType = currentFormat === 'webm' 
-                ? 'video/webm;codecs=vp9,opus' 
-                : 'video/mp4';
-            
+            // Use high-quality recording options
             const options = {
-                mimeType: MediaRecorder.isTypeSupported(mimeType) ? mimeType : 'video/webm'
+                mimeType: currentFormat === 'webm' 
+                    ? 'video/webm;codecs=vp9,opus' 
+                    : 'video/mp4;codecs=h264,aac',
+                videoBitsPerSecond: 8000000, // 8 Mbps for high quality
+                audioBitsPerSecond: 128000   // 128 kbps for audio
             };
+
+            // Fallback to supported codec if preferred isn't available
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                if (currentFormat === 'webm') {
+                    options.mimeType = 'video/webm;codecs=vp8,opus';
+                } else {
+                    options.mimeType = 'video/mp4';
+                }
+            }
 
             try {
                 mediaRecorder = new MediaRecorder(stream, options);
+                console.log('Recording with options:', options);
                 
                 mediaRecorder.ondataavailable = (event) => {
                     if (event.data.size > 0) {
@@ -433,19 +580,21 @@
                 };
 
                 mediaRecorder.onstop = () => {
-                    downloadButton.style.display = 'block';
+                    downloadButton.classList.add('show');
+                    timeDisplay.classList.remove('show');
                 };
 
-                mediaRecorder.start();
+                mediaRecorder.start(1000); // Collect data every second
                 isRecording = true;
                 recordButton.classList.add('recording');
+                timeDisplay.classList.add('show');
                 startTime = Date.now();
                 startTimer();
                 
-                showStatus('Recording Started');
+                showStatus('🔴 Recording Started');
             } catch (error) {
                 console.error('Error starting recording:', error);
-                showStatus('Recording Failed');
+                showStatus('❌ Recording Failed');
             }
         }
 
@@ -456,7 +605,7 @@
                 recordButton.classList.remove('recording');
                 stopTimer();
                 
-                showStatus('Recording Stopped');
+                showStatus('⏹️ Recording Stopped');
             }
         }
 
@@ -479,7 +628,7 @@
 
         function downloadVideo() {
             if (recordedChunks.length === 0) {
-                showStatus('No recording to download');
+                showStatus('❌ No recording to download');
                 return;
             }
 
@@ -492,13 +641,18 @@
             const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
             
             a.href = url;
-            a.download = `recording_${timestamp}.${currentFormat}`;
+            a.download = `recording_1440p_${timestamp}.${currentFormat}`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
-            showStatus('Download Started');
+            showStatus('📥 Download Started');
+            
+            // Reset UI
+            downloadButton.classList.remove('show');
+            timeDisplay.textContent = '00:00';
+            recordedChunks = [];
         }
 
         function setFormat(format) {
@@ -507,11 +661,13 @@
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
+            showStatus(`Format: ${format.toUpperCase()}`);
         }
 
         function setAspectRatio(aspect) {
             currentAspect = aspect;
             
+            // Visual feedback only - actual recording maintains full resolution
             if (aspect === 'portrait') {
                 videoElement.style.objectFit = 'cover';
                 videoElement.style.objectPosition = 'center';
@@ -524,6 +680,7 @@
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
+            showStatus(`Aspect: ${aspect === 'landscape' ? '16:9' : '9:16'}`);
         }
 
         // Initialize when page loads
@@ -539,17 +696,26 @@
         // Handle screen orientation changes
         window.addEventListener('orientationchange', () => {
             setTimeout(() => {
-                // Refresh video dimensions after orientation change
                 if (videoElement.srcObject) {
                     const videoTrack = videoElement.srcObject.getVideoTracks()[0];
                     if (videoTrack) {
+                        // Maintain 1440p recording regardless of orientation
                         videoTrack.applyConstraints({
-                            width: { ideal: window.innerWidth > window.innerHeight ? 1920 : 1080 },
-                            height: { ideal: window.innerWidth > window.innerHeight ? 1080 : 1920 }
-                        });
+                            width: { ideal: 2560 },
+                            height: { ideal: 1440 }
+                        }).catch(console.error);
                     }
                 }
             }, 500);
+        });
+
+        // Prevent accidental page refresh during recording
+        window.addEventListener('beforeunload', (e) => {
+            if (isRecording) {
+                e.preventDefault();
+                e.returnValue = 'Recording in progress. Are you sure you want to leave?';
+                return e.returnValue;
+            }
         });
     </script>
 </body>
