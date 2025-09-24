@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glassmorphic Video Recorder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .video-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+        }
+
+        #videoElement {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .controls-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .floating-control {
+            position: absolute;
+            pointer-events: auto;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .floating-control::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .floating-control:hover::before {
+            left: 100%;
+        }
+
+        .floating-control:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .record-button {
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(25px);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: visible;
+        }
+
+        .record-button::after {
+            content: '';
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .record-button.recording::after {
+            border-radius: 6px;
+            width: 28px;
+            height: 28px;
+        }
+
+        .record-button.recording {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 40px rgba(255, 255, 255, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+            }
+        }
+
+        .aspect-controls {
+            top: 30px;
+            left: 30px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            padding: 12px 20px;
+        }
+
+        .format-controls {
+            top: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            padding: 12px 20px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .radio-button {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 6px 14px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .radio-button.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .status-indicator {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .status-indicator.show {
+            opacity: 1;
+        }
+
+        .time-display {
+            bottom: 160px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 18px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+
+        .download-button {
+            bottom: 240px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 30px;
+            font-size: 15px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .label-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .aspect-controls {
+                top: 20px;
+                left: 20px;
+                padding: 8px 16px;
+            }
+
+            .format-controls {
+                top: 20px;
+                right: 20px;
+                padding: 8px 16px;
+            }
+
+            .record-button {
+                width: 80px;
+                height: 80px;
+            }
+
+            .record-button::after {
+                width: 26px;
+                height: 26px;
+            }
+
+            .record-button.recording::after {
+                width: 22px;
+                height: 22px;
+            }
+
+            .time-display {
+                bottom: 140px;
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+
+            .download-button {
+                bottom: 210px;
+                padding: 10px 25px;
+                font-size: 14px;
+            }
+
+            .radio-button {
+                padding: 5px 12px;
+                font-size: 12px;
+            }
+
+            .label-text {
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .aspect-controls, .format-controls {
+                top: 15px;
+                padding: 6px 12px;
+            }
+
+            .aspect-controls {
+                left: 15px;
+            }
+
+            .format-controls {
+                right: 15px;
+            }
+
+            .record-button {
+                width: 70px;
+                height: 70px;
+            }
+
+            .record-button::after {
+                width: 22px;
+                height: 22px;
+            }
+
+            .record-button.recording::after {
+                width: 18px;
+                height: 18px;
+            }
+
+            .radio-group {
+                gap: 6px;
+            }
+
+            .radio-button {
+                padding: 4px 10px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container">
+        <video id="videoElement" autoplay muted playsinline></video>
+    </div>
+
+    <div class="controls-overlay">
+        <!-- Aspect Ratio Controls -->
+        <div class="floating-control aspect-controls">
+            <span class="label-text">Aspect</span>
+            <div class="radio-group">
+                <div class="radio-button active" onclick="setAspectRatio('landscape')">16:9</div>
+                <div class="radio-button" onclick="setAspectRatio('portrait')">9:16</div>
+            </div>
+        </div>
+
+        <!-- Format Controls -->
+        <div class="floating-control format-controls">
+            <span class="label-text">Format</span>
+            <div class="radio-group">
+                <div class="radio-button active" onclick="setFormat('webm')">WebM</div>
+                <div class="radio-button" onclick="setFormat('mp4')">MP4</div>
+            </div>
+        </div>
+
+        <!-- Record Button -->
+        <div class="floating-control record-button" id="recordButton" onclick="toggleRecording()"></div>
+
+        <!-- Status Indicator -->
+        <div class="floating-control status-indicator" id="statusIndicator">Camera Ready</div>
+
+        <!-- Timer -->
+        <div class="floating-control time-display" id="timeDisplay">00:00</div>
+
+        <!-- Download Button -->
+        <div class="floating-control download-button" id="downloadButton" onclick="downloadVideo()">
+            Download Recording
+        </div>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let recordedChunks = [];
+        let stream;
+        let isRecording = false;
+        let startTime;
+        let timerInterval;
+        let currentFormat = 'webm';
+        let currentAspect = 'landscape';
+
+        const videoElement = document.getElementById('videoElement');
+        const recordButton = document.getElementById('recordButton');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const downloadButton = document.getElementById('downloadButton');
+
+        // Initialize camera
+        async function initCamera() {
+            try {
+                const constraints = {
+                    video: {
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 },
+                        facingMode: 'user'
+                    },
+                    audio: true
+                };
+
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                videoElement.srcObject = stream;
+                
+                showStatus('Camera Ready');
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                showStatus('Camera Access Denied');
+            }
+        }
+
+        function showStatus(message) {
+            statusIndicator.textContent = message;
+            statusIndicator.classList.add('show');
+            setTimeout(() => {
+                statusIndicator.classList.remove('show');
+            }, 2500);
+        }
+
+        function toggleRecording() {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+        function startRecording() {
+            if (!stream) {
+                showStatus('Camera not ready');
+                return;
+            }
+
+            recordedChunks = [];
+            
+            const mimeType = currentFormat === 'webm' 
+                ? 'video/webm;codecs=vp9,opus' 
+                : 'video/mp4';
+            
+            const options = {
+                mimeType: MediaRecorder.isTypeSupported(mimeType) ? mimeType : 'video/webm'
+            };
+
+            try {
+                mediaRecorder = new MediaRecorder(stream, options);
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    downloadButton.style.display = 'block';
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                recordButton.classList.add('recording');
+                startTime = Date.now();
+                startTimer();
+                
+                showStatus('Recording Started');
+            } catch (error) {
+                console.error('Error starting recording:', error);
+                showStatus('Recording Failed');
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                recordButton.classList.remove('recording');
+                stopTimer();
+                
+                showStatus('Recording Stopped');
+            }
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                timeDisplay.textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function downloadVideo() {
+            if (recordedChunks.length === 0) {
+                showStatus('No recording to download');
+                return;
+            }
+
+            const blob = new Blob(recordedChunks, {
+                type: currentFormat === 'webm' ? 'video/webm' : 'video/mp4'
+            });
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            
+            a.href = url;
+            a.download = `recording_${timestamp}.${currentFormat}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showStatus('Download Started');
+        }
+
+        function setFormat(format) {
+            currentFormat = format;
+            document.querySelectorAll('.format-controls .radio-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function setAspectRatio(aspect) {
+            currentAspect = aspect;
+            
+            if (aspect === 'portrait') {
+                videoElement.style.objectFit = 'cover';
+                videoElement.style.objectPosition = 'center';
+            } else {
+                videoElement.style.objectFit = 'cover';
+                videoElement.style.objectPosition = 'center';
+            }
+            
+            document.querySelectorAll('.aspect-controls .radio-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', initCamera);
+
+        // Handle page unload
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+
+        // Handle screen orientation changes
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                // Refresh video dimensions after orientation change
+                if (videoElement.srcObject) {
+                    const videoTrack = videoElement.srcObject.getVideoTracks()[0];
+                    if (videoTrack) {
+                        videoTrack.applyConstraints({
+                            width: { ideal: window.innerWidth > window.innerHeight ? 1920 : 1080 },
+                            height: { ideal: window.innerWidth > window.innerHeight ? 1080 : 1920 }
+                        });
+                    }
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>
