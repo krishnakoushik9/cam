@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Glassmorphic Video Recorder</title>
+    <title>Video Recorder</title>
     <style>
         * {
             margin: 0;
@@ -553,6 +553,7 @@
         let timerInterval;
         let currentFormat = 'webm';
         let currentAspect = 'landscape';
+        let videoSettings = {}; // Store actual video settings
 
         const videoElement = document.getElementById('videoElement');
         const videoContainer = document.getElementById('videoContainer');
@@ -575,7 +576,11 @@
                     audio: {
                         echoCancellation: true,
                         noiseSuppression: true,
-                        sampleRate: 44100
+                        autoGainControl: true,
+                        sampleRate: 48000,
+                        channelCount: 2,
+                        volume: 0.7, // Softer audio level
+                        latency: 0.1
                     }
                 };
 
@@ -584,6 +589,7 @@
                 
                 // Get the actual video track and log its capabilities
                 const videoTrack = stream.getVideoTracks()[0];
+                const audioTrack = stream.getAudioTracks()[0];
                 const capabilities = videoTrack.getCapabilities();
                 console.log('Video capabilities:', capabilities);
                 
@@ -594,7 +600,18 @@
                     frameRate: { ideal: 30 }
                 });
 
+                // Apply audio constraints for cleaner sound
+                if (audioTrack) {
+                    await audioTrack.applyConstraints({
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true,
+                        sampleRate: 48000
+                    });
+                }
+
                 const settings = videoTrack.getSettings();
+                videoSettings = settings; // Store for filename generation
                 console.log('Applied video settings:', settings);
                 
                 showStatus(`Camera Ready (${settings.width}x${settings.height})`);
@@ -628,21 +645,28 @@
 
             recordedChunks = [];
             
-            // Use high-quality recording options
+            // Use high-quality recording options with improved audio
             const options = {
                 mimeType: currentFormat === 'webm' 
                     ? 'video/webm;codecs=vp9,opus' 
                     : 'video/mp4;codecs=h264,aac',
                 videoBitsPerSecond: 8000000, // 8 Mbps for high quality
-                audioBitsPerSecond: 128000   // 128 kbps for audio
+                audioBitsPerSecond: 192000   // 192 kbps for cleaner audio
             };
 
             // Fallback to supported codec if preferred isn't available
             if (!MediaRecorder.isTypeSupported(options.mimeType)) {
                 if (currentFormat === 'webm') {
                     options.mimeType = 'video/webm;codecs=vp8,opus';
+                    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                        options.mimeType = 'video/webm';
+                    }
                 } else {
                     options.mimeType = 'video/mp4';
+                    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                        // Try alternative MP4 codecs
+                        options.mimeType = 'video/webm'; // Fallback to WebM
+                    }
                 }
             }
 
@@ -651,14 +675,25 @@
                 console.log('Recording with options:', options);
                 
                 mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
+                    if (event.data && event.data.size > 0) {
                         recordedChunks.push(event.data);
+                        console.log('Chunk added, size:', event.data.size);
                     }
                 };
 
                 mediaRecorder.onstop = () => {
-                    downloadButton.classList.add('show');
+                    console.log('Recording stopped, chunks:', recordedChunks.length);
+                    if (recordedChunks.length > 0) {
+                        downloadButton.classList.add('show');
+                    } else {
+                        showStatus('❌ No recording data');
+                    }
                     timeDisplay.classList.remove('show');
+                };
+
+                mediaRecorder.onerror = (event) => {
+                    console.error('MediaRecorder error:', event.error);
+                    showStatus('❌ Recording Error');
                 };
 
                 mediaRecorder.start(1000); // Collect data every second
@@ -704,25 +739,44 @@
         }
 
         function downloadVideo() {
-            if (recordedChunks.length === 0) {
+            if (!recordedChunks || recordedChunks.length === 0) {
                 showStatus('❌ No recording to download');
+                console.log('No recorded chunks available');
                 return;
             }
 
-            const blob = new Blob(recordedChunks, {
-                type: currentFormat === 'webm' ? 'video/webm' : 'video/mp4'
-            });
+            console.log('Creating download with', recordedChunks.length, 'chunks');
+
+            const mimeType = currentFormat === 'webm' ? 'video/webm' : 'video/mp4';
+            const blob = new Blob(recordedChunks, { type: mimeType });
+            
+            console.log('Blob created, size:', blob.size, 'bytes');
+
+            if (blob.size === 0) {
+                showStatus('❌ Empty recording file');
+                return;
+            }
 
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
             
+            // Use actual video settings for filename
+            const width = videoSettings.width || 'unknown';
+            const height = videoSettings.height || 'unknown';
+            
             a.href = url;
-            a.download = `recording_${currentAspect}_${canvas?.width || 'full'}x${canvas?.height || 'res'}_${timestamp}.${currentFormat}`;
+            a.download = `recording_${currentAspect}_${width}x${height}_${timestamp}.${currentFormat}`;
+            a.style.display = 'none';
+            
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            
+            // Clean up the blob URL after a short delay
+            setTimeout(() => {
+                URL.revokeObjectURL(url);
+            }, 1000);
             
             showStatus('📥 Download Started');
             
