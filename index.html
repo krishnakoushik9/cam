@@ -29,7 +29,6 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             height: 100vh;
             overflow: hidden;
-            /* FIXED: Set background to black for perfect framing */
             background: #000;
             position: relative;
         }
@@ -79,8 +78,6 @@
         .video-container.landscape #videoElement {
             border-radius: 22px;
         }
-
-        /* REMOVED: .video-mask classes as they are no longer needed for simple black framing */
 
         .controls-overlay {
             position: absolute;
@@ -710,7 +707,7 @@
             </div>
 
             <div class="control-group">
-                <div class="control-panel">
+                <div class="control-panel" id="aspectRatioControls">
                     <span class="control-label">Aspect</span>
                     <div class="radio-group">
                         <div class="radio-button active" id="aspectLandscapeButton">16:9</div>
@@ -735,7 +732,7 @@
             </div>
 
             <div class="capture-buttons">
-                 <div class="capture-button video-button active" id="videoButton"></div>
+                <div class="capture-button video-button active" id="videoButton"></div>
                 <div class="capture-button photo-button" id="photoButton"></div>
             </div>
             
@@ -758,7 +755,6 @@
     </div>
 
     <script>
-        // REFACTORED: Encapsulated the app logic inside a DOMContentLoaded listener
         document.addEventListener('DOMContentLoaded', () => {
             let mediaRecorder;
             let recordedChunks = [];
@@ -1010,9 +1006,13 @@
                 currentAspect = aspect;
                 videoContainer.className = `video-container ${aspect}`;
                 
+                // This selector now works because the ID is present in the HTML
                 document.querySelectorAll('#aspectRatioControls .radio-button').forEach(btn => btn.classList.remove('active'));
-                if (aspect === 'landscape') aspectLandscapeButton.classList.add('active');
-                else aspectPortraitButton.classList.add('active');
+                if (aspect === 'landscape') {
+                    aspectLandscapeButton.classList.add('active');
+                } else {
+                    aspectPortraitButton.classList.add('active');
+                }
                 
                 const ratioText = aspect === 'landscape' ? '16:9 Landscape' : '9:16 Portrait';
                 showStatus('📐', `Aspect ratio: ${ratioText}`);
@@ -1023,8 +1023,11 @@
                 currentFormat = format;
                 
                 document.querySelectorAll('#formatControls .radio-button').forEach(btn => btn.classList.remove('active'));
-                if (format === 'webm') formatWebmButton.classList.add('active');
-                else formatMp4Button.classList.add('active');
+                if (format === 'webm') {
+                    formatWebmButton.classList.add('active');
+                } else {
+                    formatMp4Button.classList.add('active');
+                }
                 
                 showStatus('🎛️', `Format set to ${format.toUpperCase()}`);
             }
