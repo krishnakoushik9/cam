@@ -29,22 +29,9 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             height: 100vh;
             overflow: hidden;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            /* FIXED: Set background to black for perfect framing */
+            background: #000;
             position: relative;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 107, 107, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
-            pointer-events: none;
         }
 
         .video-container {
@@ -67,7 +54,8 @@
         }
 
         .video-container.portrait {
-            width: 56.25vh;
+            width: 56.25vh; /* 9:16 aspect ratio based on viewport height */
+            height: 100vh;
             left: 50%;
             transform: translateX(-50%);
             border-radius: 24px;
@@ -77,10 +65,10 @@
 
         .video-container.landscape {
             width: 100vw;
-            height: 56.25vw;
+            height: 56.25vw; /* 16:9 aspect ratio based on viewport width */
             max-height: 100vh;
-            left: 0;
             top: 50%;
+            left: 0;
             transform: translateY(-50%);
             border-radius: 24px;
             box-shadow: var(--shadow-strong);
@@ -92,70 +80,7 @@
             border-radius: 22px;
         }
 
-        .video-mask {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-            z-index: 5;
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .video-mask.portrait::before,
-        .video-mask.portrait::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, 
-                rgba(0, 0, 0, 0.95) 0%, 
-                rgba(0, 0, 0, 0.8) 20%, 
-                rgba(0, 0, 0, 0.4) 50%, 
-                rgba(0, 0, 0, 0.8) 80%, 
-                rgba(0, 0, 0, 0.95) 100%
-            );
-            backdrop-filter: blur(20px) saturate(1.8);
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .video-mask.portrait::before {
-            left: 0;
-            right: calc(50% + 28.125vh);
-        }
-
-        .video-mask.portrait::after {
-            right: 0;
-            left: calc(50% + 28.125vh);
-        }
-
-        .video-mask.landscape::before,
-        .video-mask.landscape::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            right: 0;
-            background: linear-gradient(180deg, 
-                rgba(0, 0, 0, 0.95) 0%, 
-                rgba(0, 0, 0, 0.8) 20%, 
-                rgba(0, 0, 0, 0.4) 50%, 
-                rgba(0, 0, 0, 0.8) 80%, 
-                rgba(0, 0, 0, 0.95) 100%
-            );
-            backdrop-filter: blur(20px) saturate(1.8);
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .video-mask.landscape::before {
-            top: 0;
-            bottom: calc(50% + 28.125vw);
-        }
-
-        .video-mask.landscape::after {
-            bottom: 0;
-            top: calc(50% + 28.125vw);
-        }
+        /* REMOVED: .video-mask classes as they are no longer needed for simple black framing */
 
         .controls-overlay {
             position: absolute;
@@ -189,11 +114,7 @@
             left: 0;
             right: 0;
             height: 1px;
-            background: linear-gradient(90deg, 
-                transparent, 
-                rgba(255, 255, 255, 0.4), 
-                transparent
-            );
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
         }
 
         .glass-panel::after {
@@ -203,10 +124,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.05) 0%, 
-                transparent 50%
-            );
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
             border-radius: inherit;
             pointer-events: none;
         }
@@ -264,10 +182,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.1), 
-                rgba(255, 255, 255, 0.05)
-            );
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
             border-radius: inherit;
             opacity: 0;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -275,13 +190,8 @@
 
         .mode-button.active {
             color: white;
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.2), 
-                rgba(255, 255, 255, 0.1)
-            );
-            box-shadow: 
-                inset 0 1px 0 rgba(255, 255, 255, 0.3),
-                0 4px 20px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 4px 20px rgba(0, 0, 0, 0.15);
         }
 
         .mode-button:hover:not(.active)::before {
@@ -321,16 +231,10 @@
         }
 
         .radio-button {
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.08), 
-                rgba(255, 255, 255, 0.04)
-            );
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
             backdrop-filter: blur(15px);
             border: 1px solid;
-            border-image: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.15), 
-                rgba(255, 255, 255, 0.05)
-            ) 1;
+            border-image: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05)) 1;
             border-radius: 12px;
             padding: 8px 16px;
             color: rgba(255, 255, 255, 0.8);
@@ -350,10 +254,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.1), 
-                rgba(255, 255, 255, 0.05)
-            );
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
             opacity: 0;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -368,15 +269,9 @@
         }
 
         .radio-button.active {
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.25), 
-                rgba(255, 255, 255, 0.15)
-            );
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
             color: white;
-            border-image: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.4), 
-                rgba(255, 255, 255, 0.2)
-            ) 1;
+            border-image: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2)) 1;
             transform: scale(1.05);
         }
 
@@ -398,6 +293,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            pointer-events: auto;
         }
 
         .quality-dot {
@@ -451,6 +347,7 @@
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             box-shadow: var(--shadow-medium);
+            pointer-events: auto;
         }
 
         .capture-button::before {
@@ -460,12 +357,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: conic-gradient(
-                from 0deg,
-                transparent,
-                rgba(255, 255, 255, 0.1),
-                transparent
-            );
+            background: conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.1), transparent);
             animation: rotate 3s linear infinite;
             opacity: 0;
             transition: opacity 0.3s ease;
@@ -503,18 +395,15 @@
         .photo-button {
             display: none;
         }
-
         .photo-button.active {
             display: flex;
         }
-
         .photo-button::after {
             background: var(--primary-blue);
             border-radius: 10px;
             width: 36px;
             height: 36px;
         }
-
         .photo-button:hover::after {
             box-shadow: 0 0 30px rgba(102, 126, 234, 0.6);
         }
@@ -523,23 +412,14 @@
         .video-button {
             display: none;
         }
-
         .video-button.active {
             display: flex;
         }
-
         .video-button.recording {
-            background: linear-gradient(135deg, 
-                rgba(255, 107, 107, 0.2), 
-                rgba(238, 90, 82, 0.1)
-            );
-            border-image: linear-gradient(135deg, 
-                rgba(255, 107, 107, 0.6), 
-                rgba(238, 90, 82, 0.3)
-            ) 1;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(238, 90, 82, 0.1));
+            border-image: linear-gradient(135deg, rgba(255, 107, 107, 0.6), rgba(238, 90, 82, 0.3)) 1;
             animation: recordPulse 2s infinite;
         }
-
         .video-button.recording::after {
             border-radius: 10px;
             width: 36px;
@@ -548,15 +428,9 @@
         }
 
         @keyframes recordPulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4);
-            }
-            70% {
-                box-shadow: 0 0 0 30px rgba(255, 107, 107, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(255, 107, 107, 0);
-            }
+            0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4); }
+            70% { box-shadow: 0 0 0 30px rgba(255, 107, 107, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
         }
 
         /* Timer Display */
@@ -578,6 +452,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            pointer-events: auto;
         }
 
         .timer-display.show {
@@ -616,6 +491,7 @@
             gap: 10px;
             position: relative;
             overflow: hidden;
+            pointer-events: auto;
         }
 
         .action-button::before {
@@ -625,11 +501,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, 
-                transparent, 
-                rgba(255, 255, 255, 0.2), 
-                transparent
-            );
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: left 0.5s ease;
         }
 
@@ -720,6 +592,7 @@
             text-align: center;
             color: white;
             z-index: 100;
+            pointer-events: auto;
         }
 
         .error-state h2 {
@@ -754,39 +627,31 @@
                 gap: 15px;
                 align-items: center;
             }
-
             .control-group {
                 flex-direction: column;
                 gap: 12px;
             }
-
             .control-panel {
                 padding: 12px 20px;
             }
-
             .quality-indicator {
                 position: static;
                 order: -1;
             }
-
             .capture-interface {
                 padding: 30px 20px;
             }
-
             .capture-buttons {
                 gap: 30px;
             }
-
             .capture-button {
                 width: 80px;
                 height: 80px;
             }
-
             .capture-button::after {
                 width: 32px;
                 height: 32px;
             }
-
             .video-button.recording::after,
             .photo-button::after {
                 width: 30px;
@@ -799,25 +664,20 @@
                 top: 15px;
                 padding: 0 15px;
             }
-
             .mode-button {
                 padding: 10px 20px;
                 font-size: 13px;
             }
-
             .control-panel {
                 padding: 10px 16px;
             }
-
             .capture-interface {
                 padding: 25px 15px;
             }
-
             .capture-button {
                 width: 70px;
                 height: 70px;
             }
-
             .timer-display {
                 padding: 12px 24px;
                 font-size: 18px;
@@ -831,51 +691,43 @@
     </style>
 </head>
 <body>
-    <div class="video-container" id="videoContainer">
+    <div class="video-container landscape" id="videoContainer">
         <video id="videoElement" autoplay muted playsinline></video>
-        <div class="video-mask" id="videoMask"></div>
     </div>
 
     <div class="flash-overlay" id="flashOverlay"></div>
 
     <div class="controls-overlay">
-        <!-- Header Controls -->
         <div class="header-controls">
-            <!-- Mode Selector -->
             <div class="mode-selector">
-                <button class="mode-button active" onclick="setMode('video')">Video</button>
-                <button class="mode-button" onclick="setMode('photo')">Photo</button>
+                <button class="mode-button active" id="modeVideoButton">Video</button>
+                <button class="mode-button" id="modePhotoButton">Photo</button>
             </div>
 
-            <!-- Quality Indicator -->
             <div class="quality-indicator" id="qualityIndicator">
                 <div class="quality-dot"></div>
                 <span>Initializing...</span>
             </div>
 
-            <!-- Control Groups -->
             <div class="control-group">
-                <!-- Aspect Ratio Controls -->
                 <div class="control-panel">
                     <span class="control-label">Aspect</span>
                     <div class="radio-group">
-                        <div class="radio-button active" onclick="setAspectRatio('landscape')">16:9</div>
-                        <div class="radio-button" onclick="setAspectRatio('portrait')">9:16</div>
+                        <div class="radio-button active" id="aspectLandscapeButton">16:9</div>
+                        <div class="radio-button" id="aspectPortraitButton">9:16</div>
                     </div>
                 </div>
 
-                <!-- Format Controls -->
                 <div class="control-panel" id="formatControls">
                     <span class="control-label">Format</span>
                     <div class="radio-group">
-                        <div class="radio-button active" onclick="setFormat('webm')">WebM</div>
-                        <div class="radio-button" onclick="setFormat('mp4')">MP4</div>
+                        <div class="radio-button active" id="formatWebmButton">WebM</div>
+                        <div class="radio-button" id="formatMp4Button">MP4</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Capture Interface -->
         <div class="capture-interface">
             <div class="timer-display" id="timerDisplay">
                 <div class="timer-dot"></div>
@@ -883,737 +735,468 @@
             </div>
 
             <div class="capture-buttons">
-                <div class="capture-button video-button active" id="videoButton" onclick="toggleRecording()"></div>
-                <div class="capture-button photo-button" id="photoButton" onclick="takePhoto()"></div>
+                 <div class="capture-button video-button active" id="videoButton"></div>
+                <div class="capture-button photo-button" id="photoButton"></div>
             </div>
-
-            <button class="action-button" id="downloadButton" onclick="downloadMedia()">
+            
+            <button class="action-button" id="downloadButton">
                 <span>📥</span>
                 <span>Download</span>
             </button>
         </div>
 
-        <!-- Status Toast -->
         <div class="status-toast" id="statusToast">
             <span class="status-icon" id="statusIcon"></span>
             <span id="statusText">Initializing Camera...</span>
         </div>
 
-        <!-- Error State -->
         <div class="error-state" id="errorState" style="display: none;">
             <h2>Camera Access Required</h2>
             <p>Please allow camera and microphone access to use this application.</p>
-            <button class="retry-button" onclick="initCamera()">Try Again</button>
+            <button class="retry-button" id="retryButton">Try Again</button>
         </div>
     </div>
 
     <script>
-        let mediaRecorder;
-        let recordedChunks = [];
-        let stream;
-        let isRecording = false;
-        let startTime;
-        let timerInterval;
-        let currentFormat = 'webm';
-        let currentAspect = 'landscape';
-        let currentMode = 'video';
-        let videoSettings = {};
-        let capturedPhoto = null;
-        let isInitialized = false;
+        // REFACTORED: Encapsulated the app logic inside a DOMContentLoaded listener
+        document.addEventListener('DOMContentLoaded', () => {
+            let mediaRecorder;
+            let recordedChunks = [];
+            let stream;
+            let isRecording = false;
+            let startTime;
+            let timerInterval;
+            let currentFormat = 'webm';
+            let currentAspect = 'landscape';
+            let currentMode = 'video';
+            let videoSettings = {};
+            let capturedPhoto = null;
+            let isInitialized = false;
 
-        const videoElement = document.getElementById('videoElement');
-        const videoContainer = document.getElementById('videoContainer');
-        const videoMask = document.getElementById('videoMask');
-        const videoButton = document.getElementById('videoButton');
-        const photoButton = document.getElementById('photoButton');
-        const statusToast = document.getElementById('statusToast');
-        const statusIcon = document.getElementById('statusIcon');
-        const statusText = document.getElementById('statusText');
-        const timerDisplay = document.getElementById('timerDisplay');
-        const downloadButton = document.getElementById('downloadButton');
-        const flashOverlay = document.getElementById('flashOverlay');
-        const qualityIndicator = document.getElementById('qualityIndicator');
-        const formatControls = document.getElementById('formatControls');
-        const errorState = document.getElementById('errorState');
-
-        // Check for browser support
-        function checkBrowserSupport() {
-            const issues = [];
-            
-            if (!navigator.mediaDevices) {
-                issues.push('MediaDevices API not supported');
-            }
-            
-            if (!navigator.mediaDevices.getUserMedia) {
-                issues.push('getUserMedia not supported');
-            }
-            
-            if (!window.MediaRecorder) {
-                issues.push('MediaRecorder API not supported');
-            }
-            
-            if (!window.URL || !window.URL.createObjectURL) {
-                issues.push('URL API not supported');
-            }
-            
-            return issues;
-        }
-
-        // Improved camera initialization with better error handling
-        async function initCamera() {
-            console.log('Initializing camera...');
-            
-            // Hide error state
-            errorState.style.display = 'none';
-            
-            // Check browser support first
-            const supportIssues = checkBrowserSupport();
-            if (supportIssues.length > 0) {
-                console.error('Browser support issues:', supportIssues);
-                showStatus('❌', 'Browser not supported');
-                showError('Browser Not Supported', 'Your browser doesn\'t support the required features for video recording.');
-                return;
-            }
-            
-            // Show initializing status
-            showStatus('⏳', 'Requesting camera access...');
-            
-            try {
-                // Stop existing stream if any
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                }
-                
-                // Start with basic constraints for better compatibility
-                const constraints = {
-                    video: {
-                        width: { ideal: 1920, min: 640 },
-                        height: { ideal: 1080, min: 480 },
-                        frameRate: { ideal: 30, min: 15 },
-                        facingMode: 'user'
-                    },
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true
-                    }
-                };
-
-                console.log('Requesting media with constraints:', constraints);
-                stream = await navigator.mediaDevices.getUserMedia(constraints);
-                
-                if (!stream || !stream.active) {
-                    throw new Error('Stream is not active');
-                }
-                
-                videoElement.srcObject = stream;
-                
-                // Wait for video to load metadata
-                await new Promise((resolve, reject) => {
-                    videoElement.addEventListener('loadedmetadata', resolve, { once: true });
-                    videoElement.addEventListener('error', reject, { once: true });
-                    setTimeout(() => reject(new Error('Video load timeout')), 10000);
-                });
-                
-                const videoTrack = stream.getVideoTracks()[0];
-                const audioTrack = stream.getAudioTracks()[0];
-                
-                if (!videoTrack) {
-                    throw new Error('No video track available');
-                }
-                
-                console.log('Video track:', videoTrack);
-                console.log('Audio track:', audioTrack);
-                
-                // Get current settings
-                const settings = videoTrack.getSettings();
-                videoSettings = settings;
-                console.log('Video settings:', settings);
-                
-                // Try to apply higher quality constraints if supported
-                try {
-                    const capabilities = videoTrack.getCapabilities();
-                    console.log('Video capabilities:', capabilities);
-                    
-                    if (capabilities.width && capabilities.height) {
-                        const maxWidth = Math.min(capabilities.width.max || 1920, 2560);
-                        const maxHeight = Math.min(capabilities.height.max || 1080, 1440);
-                        
-                        await videoTrack.applyConstraints({
-                            width: { ideal: maxWidth },
-                            height: { ideal: maxHeight },
-                            frameRate: { ideal: 30 }
-                        });
-                        
-                        // Get updated settings
-                        videoSettings = videoTrack.getSettings();
-                        console.log('Updated video settings:', videoSettings);
-                    }
-                } catch (constraintError) {
-                    console.warn('Could not apply higher quality constraints:', constraintError);
-                }
-                
-                // Update quality indicator
-                updateQualityIndicator();
-                
-                isInitialized = true;
-                showStatus('✅', 'Camera ready');
-                
-            } catch (error) {
-                console.error('Camera initialization error:', error);
-                handleCameraError(error);
-            }
-        }
-
-        function handleCameraError(error) {
-            console.error('Camera error details:', error);
-            
-            let message = 'Camera access failed';
-            let suggestion = 'Please check your camera permissions and try again.';
-            
-            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-                message = 'Camera permission denied';
-                suggestion = 'Please allow camera access in your browser settings and refresh the page.';
-            } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-                message = 'No camera found';
-                suggestion = 'Please connect a camera and try again.';
-            } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-                message = 'Camera is busy';
-                suggestion = 'Please close other applications using your camera and try again.';
-            } else if (error.name === 'OverconstrainedError' || error.name === 'ConstraintNotSatisfiedError') {
-                message = 'Camera constraints not supported';
-                suggestion = 'Your camera doesn\'t support the required video quality.';
-            } else if (error.name === 'NotSupportedError') {
-                message = 'Camera not supported';
-                suggestion = 'Your browser or device doesn\'t support camera access.';
-            } else if (error.name === 'TypeError') {
-                message = 'Browser not supported';
-                suggestion = 'Please use a modern browser like Chrome, Firefox, or Edge.';
-            }
-            
-            showStatus('❌', message);
-            showError(message, suggestion);
-            
-            qualityIndicator.innerHTML = `
-                <div class="quality-dot" style="background: #ff6b6b; animation: none;"></div>
-                <span>Camera Error</span>
-            `;
-        }
-
-        function showError(title, message) {
+            // DOM Element References
+            const videoElement = document.getElementById('videoElement');
+            const videoContainer = document.getElementById('videoContainer');
+            const videoButton = document.getElementById('videoButton');
+            const photoButton = document.getElementById('photoButton');
+            const statusToast = document.getElementById('statusToast');
+            const statusIcon = document.getElementById('statusIcon');
+            const statusText = document.getElementById('statusText');
+            const timerDisplay = document.getElementById('timerDisplay');
+            const downloadButton = document.getElementById('downloadButton');
+            const flashOverlay = document.getElementById('flashOverlay');
+            const qualityIndicator = document.getElementById('qualityIndicator');
+            const formatControls = document.getElementById('formatControls');
             const errorState = document.getElementById('errorState');
-            errorState.querySelector('h2').textContent = title;
-            errorState.querySelector('p').textContent = message;
-            errorState.style.display = 'block';
-        }
+            
+            // Button References for Event Listeners
+            const modeVideoButton = document.getElementById('modeVideoButton');
+            const modePhotoButton = document.getElementById('modePhotoButton');
+            const aspectLandscapeButton = document.getElementById('aspectLandscapeButton');
+            const aspectPortraitButton = document.getElementById('aspectPortraitButton');
+            const formatWebmButton = document.getElementById('formatWebmButton');
+            const formatMp4Button = document.getElementById('formatMp4Button');
+            const retryButton = document.getElementById('retryButton');
 
-        function updateQualityIndicator() {
-            const resolution = `${videoSettings.width}x${videoSettings.height}`;
-            let quality = 'SD Ready';
-            let dotColor = '#51cf66';
-            
-            if (videoSettings.width >= 2560) {
-                quality = '4K Ready';
-                dotColor = '#40c057';
-            } else if (videoSettings.width >= 1920) {
-                quality = 'Full HD';
-                dotColor = '#51cf66';
-            } else if (videoSettings.width >= 1280) {
-                quality = 'HD Ready';
-                dotColor = '#51cf66';
-            } else if (videoSettings.width >= 854) {
-                quality = 'HD Ready';
-                dotColor = '#ffd43b';
-            } else {
-                quality = 'SD Ready';
-                dotColor = '#ff8787';
-            }
-            
-            qualityIndicator.innerHTML = `
-                <div class="quality-dot" style="background: ${dotColor};"></div>
-                <span>${quality} (${resolution})</span>
-            `;
-        }
+            // --- CORE FUNCTIONS ---
 
-        function showStatus(icon, message, duration = 3000) {
-            statusIcon.textContent = icon;
-            statusText.textContent = message;
-            statusToast.classList.add('show');
-            
-            setTimeout(() => {
-                statusToast.classList.remove('show');
-            }, duration);
-        }
+            async function initCamera() {
+                console.log('Initializing camera...');
+                errorState.style.display = 'none';
+                
+                const supportIssues = checkBrowserSupport();
+                if (supportIssues.length > 0) {
+                    console.error('Browser support issues:', supportIssues);
+                    showStatus('❌', 'Browser not supported');
+                    showError('Browser Not Supported', 'Your browser doesn\'t support the required features for video recording.');
+                    return;
+                }
+                
+                showStatus('⏳', 'Requesting camera access...');
+                
+                try {
+                    if (stream) {
+                        stream.getTracks().forEach(track => track.stop());
+                    }
+                    
+                    const constraints = {
+                        video: {
+                            width: { ideal: 1920 },
+                            height: { ideal: 1080 },
+                            frameRate: { ideal: 30 },
+                            facingMode: 'user'
+                        },
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    };
 
-        function setMode(mode) {
-            currentMode = mode;
-            
-            document.querySelectorAll('.mode-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            if (mode === 'video') {
-                videoButton.classList.add('active');
-                photoButton.classList.remove('active');
-                formatControls.style.opacity = '1';
-                formatControls.style.pointerEvents = 'auto';
-            } else {
-                photoButton.classList.add('active');
-                videoButton.classList.remove('active');
-                formatControls.style.opacity = '0.5';
-                formatControls.style.pointerEvents = 'none';
-            }
-            
-            showStatus('🎥', `${mode.charAt(0).toUpperCase() + mode.slice(1)} mode active`);
-        }
-
-        function toggleRecording() {
-            if (!isInitialized || !stream) {
-                showStatus('❌', 'Camera not ready');
-                return;
-            }
-            
-            if (!isRecording) {
-                startRecording();
-            } else {
-                stopRecording();
-            }
-        }
-
-        function getSupportedMimeType() {
-            const types = [
-                'video/webm;codecs=vp9,opus',
-                'video/webm;codecs=vp8,opus', 
-                'video/webm;codecs=h264,opus',
-                'video/webm',
-                'video/mp4;codecs=h264,aac',
-                'video/mp4'
-            ];
-            
-            for (let type of types) {
-                if (MediaRecorder.isTypeSupported(type)) {
-                    console.log('Using MIME type:', type);
-                    return type;
+                    console.log('Requesting media with constraints:', constraints);
+                    stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    
+                    if (!stream || !stream.active) {
+                        throw new Error('Stream is not active');
+                    }
+                    
+                    videoElement.srcObject = stream;
+                    
+                    await new Promise((resolve, reject) => {
+                        videoElement.addEventListener('loadedmetadata', resolve, { once: true });
+                        videoElement.addEventListener('error', (err) => reject(new Error('Video element error')), { once: true });
+                        setTimeout(() => reject(new Error('Video load timeout')), 5000);
+                    });
+                    
+                    const videoTrack = stream.getVideoTracks()[0];
+                    if (!videoTrack) {
+                        throw new Error('No video track available');
+                    }
+                    
+                    videoSettings = videoTrack.getSettings();
+                    console.log('Initial video settings:', videoSettings);
+                    
+                    updateQualityIndicator();
+                    isInitialized = true;
+                    showStatus('✅', 'Camera ready');
+                    
+                } catch (error) {
+                    console.error('Camera initialization error:', error);
+                    handleCameraError(error);
                 }
             }
             
-            console.warn('No supported MIME type found, using default');
-            return 'video/webm';
-        }
-
-        function startRecording() {
-            console.log('Starting recording...');
-            
-            recordedChunks = [];
-            
-            const mimeType = getSupportedMimeType();
-            const options = {
-                mimeType: mimeType,
-                videoBitsPerSecond: 5000000, // 5 Mbps for better compatibility
-                audioBitsPerSecond: 128000   // 128 kbps audio
-            };
-
-            try {
-                mediaRecorder = new MediaRecorder(stream, options);
-                console.log('MediaRecorder created with options:', options);
-                
-                mediaRecorder.ondataavailable = (event) => {
-                    console.log('Data available, size:', event.data?.size || 0);
-                    if (event.data && event.data.size > 0) {
-                        recordedChunks.push(event.data);
-                    }
-                };
-
-                mediaRecorder.onstop = () => {
-                    console.log('Recording stopped. Total chunks:', recordedChunks.length);
-                    const totalSize = recordedChunks.reduce((sum, chunk) => sum + chunk.size, 0);
-                    console.log('Total recording size:', totalSize, 'bytes');
-                    
-                    if (recordedChunks.length > 0 && totalSize > 0) {
-                        downloadButton.classList.add('show');
-                        showStatus('✅', `Recording saved (${Math.round(totalSize / 1024 / 1024 * 100) / 100} MB)`);
-                    } else {
-                        showStatus('❌', 'Recording failed - no data captured');
-                    }
-                    
-                    timerDisplay.classList.remove('show');
-                };
-
-                mediaRecorder.onerror = (event) => {
-                    console.error('MediaRecorder error:', event.error);
-                    showStatus('❌', 'Recording error: ' + (event.error?.message || 'Unknown error'));
-                    isRecording = false;
-                    videoButton.classList.remove('recording');
-                    stopTimer();
-                };
-
-                mediaRecorder.onstart = () => {
-                    console.log('MediaRecorder started');
-                    isRecording = true;
-                    videoButton.classList.add('recording');
-                    timerDisplay.classList.add('show');
-                    startTime = Date.now();
-                    startTimer();
-                };
-
-                // Start recording with 1 second intervals
-                mediaRecorder.start(1000);
-                showStatus('🔴', 'Recording started');
-                
-            } catch (error) {
-                console.error('Error creating MediaRecorder:', error);
-                showStatus('❌', 'Failed to start recording: ' + error.message);
+            function toggleRecording() {
+                if (!isInitialized || !stream) {
+                    showStatus('❌', 'Camera not ready');
+                    return;
+                }
+                if (!isRecording) {
+                    startRecording();
+                } else {
+                    stopRecording();
+                }
             }
-        }
 
-        function stopRecording() {
-            console.log('Stopping recording...');
-            
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            function startRecording() {
+                console.log('Starting recording...');
+                recordedChunks = [];
+                const mimeType = getSupportedMimeType();
+                const options = {
+                    mimeType: mimeType,
+                    videoBitsPerSecond: 8000000,
+                    audioBitsPerSecond: 128000
+                };
+
                 try {
+                    mediaRecorder = new MediaRecorder(stream, options);
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data && event.data.size > 0) {
+                            recordedChunks.push(event.data);
+                        }
+                    };
+                    mediaRecorder.onstop = () => {
+                        console.log('Recording stopped. Total chunks:', recordedChunks.length);
+                        const totalSize = recordedChunks.reduce((sum, chunk) => sum + chunk.size, 0);
+                        if (totalSize > 0) {
+                            downloadButton.classList.add('show');
+                            showStatus('✅', `Recording saved (${(totalSize / 1024 / 1024).toFixed(2)} MB)`);
+                        } else {
+                            showStatus('❌', 'Recording failed - no data captured');
+                        }
+                        timerDisplay.classList.remove('show');
+                    };
+                    mediaRecorder.onerror = (event) => {
+                        console.error('MediaRecorder error:', event.error);
+                        showStatus('❌', 'Recording error: ' + (event.error?.message || 'Unknown error'));
+                        isRecording = false;
+                        videoButton.classList.remove('recording');
+                        stopTimer();
+                    };
+                    mediaRecorder.onstart = () => {
+                        isRecording = true;
+                        videoButton.classList.add('recording');
+                        timerDisplay.classList.add('show');
+                        startTime = Date.now();
+                        startTimer();
+                    };
+
+                    mediaRecorder.start(1000);
+                    showStatus('🔴', 'Recording started');
+                    downloadButton.classList.remove('show');
+                } catch (error) {
+                    console.error('Error creating MediaRecorder:', error);
+                    showStatus('❌', 'Failed to start recording: ' + error.message);
+                }
+            }
+
+            function stopRecording() {
+                console.log('Stopping recording...');
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
                     mediaRecorder.stop();
                     showStatus('⏹️', 'Processing recording...');
+                }
+                isRecording = false;
+                videoButton.classList.remove('recording');
+                stopTimer();
+            }
+
+            function takePhoto() {
+                if (!isInitialized || !stream) {
+                    showStatus('❌', 'Camera not ready');
+                    return;
+                }
+                console.log('Taking photo...');
+                flashOverlay.classList.add('show');
+                setTimeout(() => flashOverlay.classList.remove('show'), 150);
+
+                const originalTransform = videoContainer.style.transform;
+                videoContainer.style.transform = `${originalTransform} scale(0.98)`;
+                setTimeout(() => videoContainer.style.transform = originalTransform, 100);
+
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = videoElement.videoWidth;
+                    canvas.height = videoElement.videoHeight;
+                    if (canvas.width === 0 || canvas.height === 0) throw new Error('Video dimensions not available');
+                    
+                    canvas.getContext('2d').drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                    canvas.toBlob((blob) => {
+                        if (blob && blob.size > 0) {
+                            capturedPhoto = blob;
+                            downloadButton.classList.add('show');
+                            showStatus('📸', `Photo captured (${Math.round(blob.size / 1024)} KB)`);
+                        } else {
+                            throw new Error('Failed to create photo blob');
+                        }
+                    }, 'image/png', 1.0);
                 } catch (error) {
-                    console.error('Error stopping recording:', error);
-                    showStatus('❌', 'Error stopping recording');
+                    console.error('Photo capture error:', error);
+                    showStatus('❌', 'Photo capture failed: ' + error.message);
                 }
             }
-            
-            isRecording = false;
-            videoButton.classList.remove('recording');
-            stopTimer();
-        }
 
-        function takePhoto() {
-            if (!isInitialized || !stream) {
-                showStatus('❌', 'Camera not ready');
-                return;
-            }
-
-            console.log('Taking photo...');
-
-            // Flash effect
-            flashOverlay.classList.add('show');
-            setTimeout(() => {
-                flashOverlay.classList.remove('show');
-            }, 150);
-
-            // Camera feedback animation
-            const originalTransform = videoContainer.style.transform;
-            if (currentAspect === 'portrait') {
-                videoContainer.style.transform = 'translateX(-50%) scale(0.98)';
-            } else {
-                videoContainer.style.transform = 'translateY(-50%) scale(0.98)';
+            function downloadMedia() {
+                if (currentMode === 'video') downloadVideo();
+                else downloadPhoto();
             }
             
-            setTimeout(() => {
-                videoContainer.style.transform = originalTransform;
-            }, 100);
+            // --- UI AND STATE MANAGEMENT ---
 
-            // Capture the photo
-            try {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
+            function setMode(mode) {
+                if (currentMode === mode) return;
+                currentMode = mode;
                 
-                // Set canvas size to video dimensions
-                canvas.width = videoElement.videoWidth;
-                canvas.height = videoElement.videoHeight;
+                document.querySelectorAll('.mode-button').forEach(btn => btn.classList.remove('active'));
                 
-                if (canvas.width === 0 || canvas.height === 0) {
-                    throw new Error('Video dimensions not available');
+                if (mode === 'video') {
+                    modeVideoButton.classList.add('active');
+                    videoButton.classList.add('active');
+                    photoButton.classList.remove('active');
+                    formatControls.style.opacity = '1';
+                    formatControls.style.pointerEvents = 'auto';
+                } else {
+                    modePhotoButton.classList.add('active');
+                    photoButton.classList.add('active');
+                    videoButton.classList.remove('active');
+                    formatControls.style.opacity = '0.5';
+                    formatControls.style.pointerEvents = 'none';
                 }
+                downloadButton.classList.remove('show');
+                showStatus('🎥', `${mode.charAt(0).toUpperCase() + mode.slice(1)} mode active`);
+            }
+
+            function setAspectRatio(aspect) {
+                if (currentAspect === aspect) return;
+                currentAspect = aspect;
+                videoContainer.className = `video-container ${aspect}`;
                 
-                // Draw current video frame
-                ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                document.querySelectorAll('#aspectRatioControls .radio-button').forEach(btn => btn.classList.remove('active'));
+                if (aspect === 'landscape') aspectLandscapeButton.classList.add('active');
+                else aspectPortraitButton.classList.add('active');
                 
-                // Convert to blob
-                canvas.toBlob((blob) => {
-                    if (blob && blob.size > 0) {
-                        capturedPhoto = blob;
-                        downloadButton.classList.add('show');
-                        showStatus('📸', `Photo captured (${Math.round(blob.size / 1024)} KB)`);
-                        console.log('Photo captured successfully, size:', blob.size);
-                    } else {
-                        throw new Error('Failed to create photo blob');
+                const ratioText = aspect === 'landscape' ? '16:9 Landscape' : '9:16 Portrait';
+                showStatus('📐', `Aspect ratio: ${ratioText}`);
+            }
+
+            function setFormat(format) {
+                if (currentFormat === format) return;
+                currentFormat = format;
+                
+                document.querySelectorAll('#formatControls .radio-button').forEach(btn => btn.classList.remove('active'));
+                if (format === 'webm') formatWebmButton.classList.add('active');
+                else formatMp4Button.classList.add('active');
+                
+                showStatus('🎛️', `Format set to ${format.toUpperCase()}`);
+            }
+            
+            // --- HELPER AND UTILITY FUNCTIONS ---
+
+            function checkBrowserSupport() {
+                const issues = [];
+                if (!navigator.mediaDevices?.getUserMedia) issues.push('getUserMedia');
+                if (!window.MediaRecorder) issues.push('MediaRecorder');
+                if (!window.URL?.createObjectURL) issues.push('URL API');
+                return issues;
+            }
+
+            function getSupportedMimeType() {
+                const preferredType = currentFormat === 'mp4' ? 'video/mp4' : 'video/webm';
+                const fallbackType = currentFormat === 'mp4' ? 'video/webm' : 'video/mp4';
+
+                if (MediaRecorder.isTypeSupported(preferredType)) {
+                    console.log(`Using preferred MIME type: ${preferredType}`);
+                    return preferredType;
+                }
+                console.warn(`Preferred MIME type ${preferredType} not supported. Trying fallback.`);
+                if (MediaRecorder.isTypeSupported(fallbackType)) {
+                    console.log(`Using fallback MIME type: ${fallbackType}`);
+                    return fallbackType;
+                }
+                console.error('Neither WebM nor MP4 are supported.');
+                showStatus('❌', 'No supported video format found.');
+                return '';
+            }
+            
+            function downloadVideo() {
+                if (!recordedChunks || recordedChunks.length === 0) {
+                    showStatus('❌', 'No recording available');
+                    return;
+                }
+                try {
+                    const mimeType = recordedChunks[0].type || 'video/webm';
+                    const extension = currentFormat;
+                    const blob = new Blob(recordedChunks, { type: mimeType });
+
+                    if (blob.size === 0) {
+                        showStatus('❌', 'Recording is empty');
+                        return;
                     }
-                }, 'image/png', 1.0);
-                
-            } catch (error) {
-                console.error('Photo capture error:', error);
-                showStatus('❌', 'Photo capture failed: ' + error.message);
+
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                    a.href = url;
+                    a.download = `video_${timestamp}.${extension}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    setTimeout(() => URL.revokeObjectURL(url), 100);
+                    
+                    showStatus('📥', 'Video download started');
+                    downloadButton.classList.remove('show');
+                    recordedChunks = [];
+                } catch (error) {
+                    console.error('Download error:', error);
+                    showStatus('❌', 'Download failed: ' + error.message);
+                }
             }
-        }
 
-        function startTimer() {
-            timerInterval = setInterval(() => {
-                const elapsed = Date.now() - startTime;
-                const minutes = Math.floor(elapsed / 60000);
-                const seconds = Math.floor((elapsed % 60000) / 1000);
-                const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                timerDisplay.querySelector('span').textContent = timeString;
-            }, 1000);
-        }
+            function downloadPhoto() {
+                if (!capturedPhoto) {
+                    showStatus('❌', 'No photo available');
+                    return;
+                }
+                try {
+                    const url = URL.createObjectURL(capturedPhoto);
+                    const a = document.createElement('a');
+                    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                    a.href = url;
+                    a.download = `photo_${timestamp}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    setTimeout(() => URL.revokeObjectURL(url), 100);
 
-        function stopTimer() {
-            if (timerInterval) {
+                    showStatus('📥', 'Photo download started');
+                    downloadButton.classList.remove('show');
+                    capturedPhoto = null;
+                } catch (error) {
+                    console.error('Photo download error:', error);
+                    showStatus('❌', 'Photo download failed: ' + error.message);
+                }
+            }
+            
+            function handleCameraError(error) {
+                let message = 'Camera access failed';
+                let suggestion = 'Please check permissions and try again.';
+                if (error.name === 'NotAllowedError') {
+                    message = 'Permission denied';
+                    suggestion = 'Please allow camera access in your browser settings.';
+                } else if (error.name === 'NotFoundError') {
+                    message = 'No camera found';
+                    suggestion = 'Please connect a camera and try again.';
+                } else if (error.name === 'NotReadableError') {
+                    message = 'Camera is busy';
+                    suggestion = 'Close other apps using the camera and try again.';
+                }
+                showStatus('❌', message);
+                showError(message, suggestion);
+                qualityIndicator.innerHTML = `<div class="quality-dot" style="background: #ff6b6b; animation: none;"></div><span>Error</span>`;
+            }
+
+            function showError(title, message) {
+                errorState.querySelector('h2').textContent = title;
+                errorState.querySelector('p').textContent = message;
+                errorState.style.display = 'block';
+            }
+
+            function updateQualityIndicator() {
+                const { width, height } = videoSettings;
+                qualityIndicator.querySelector('span').textContent = `Ready (${width}x${height})`;
+            }
+
+            function showStatus(icon, message, duration = 3000) {
+                statusIcon.textContent = icon;
+                statusText.textContent = message;
+                statusToast.classList.add('show');
+                setTimeout(() => statusToast.classList.remove('show'), duration);
+            }
+
+            function startTimer() {
+                timerInterval = setInterval(() => {
+                    const elapsed = Date.now() - startTime;
+                    const minutes = Math.floor(elapsed / 60000);
+                    const seconds = Math.floor((elapsed % 60000) / 1000);
+                    timerDisplay.querySelector('span').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+            }
+
+            function stopTimer() {
                 clearInterval(timerInterval);
                 timerInterval = null;
             }
-        }
-
-        function downloadMedia() {
-            if (currentMode === 'video') {
-                downloadVideo();
-            } else {
-                downloadPhoto();
-            }
-        }
-
-        function downloadVideo() {
-            if (!recordedChunks || recordedChunks.length === 0) {
-                showStatus('❌', 'No recording available');
-                return;
-            }
-
-            console.log('Downloading video with', recordedChunks.length, 'chunks');
-
-            try {
-                // Determine MIME type from actual recording
-                const firstChunk = recordedChunks[0];
-                const mimeType = firstChunk.type || 'video/webm';
-                const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
-                
-                const blob = new Blob(recordedChunks, { type: mimeType });
-                console.log('Created blob:', blob.size, 'bytes, type:', blob.type);
-
-                if (blob.size === 0) {
-                    showStatus('❌', 'Recording is empty');
-                    return;
-                }
-
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-                const resolution = `${videoSettings.width || 'unknown'}x${videoSettings.height || 'unknown'}`;
-                
-                a.href = url;
-                a.download = `video_${currentAspect}_${resolution}_${timestamp}.${extension}`;
-                a.style.display = 'none';
-                
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                
-                // Clean up
-                setTimeout(() => {
-                    URL.revokeObjectURL(url);
-                }, 1000);
-                
-                showStatus('📥', 'Video download started');
-                downloadButton.classList.remove('show');
-                timerDisplay.querySelector('span').textContent = '00:00';
-                recordedChunks = [];
-                
-            } catch (error) {
-                console.error('Download error:', error);
-                showStatus('❌', 'Download failed: ' + error.message);
-            }
-        }
-
-        function downloadPhoto() {
-            if (!capturedPhoto) {
-                showStatus('❌', 'No photo available');
-                return;
-            }
-
-            try {
-                const url = URL.createObjectURL(capturedPhoto);
-                const a = document.createElement('a');
-                const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-                const resolution = `${videoSettings.width || 'unknown'}x${videoSettings.height || 'unknown'}`;
-                
-                a.href = url;
-                a.download = `photo_${currentAspect}_${resolution}_${timestamp}.png`;
-                a.style.display = 'none';
-                
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                
-                setTimeout(() => {
-                    URL.revokeObjectURL(url);
-                }, 1000);
-                
-                showStatus('📥', 'Photo download started');
-                downloadButton.classList.remove('show');
-                capturedPhoto = null;
-                
-            } catch (error) {
-                console.error('Photo download error:', error);
-                showStatus('❌', 'Photo download failed: ' + error.message);
-            }
-        }
-
-        function setFormat(format) {
-            currentFormat = format;
-            document.querySelectorAll('#formatControls .radio-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            showStatus('🎛️', `Format set to ${format.toUpperCase()}`);
-        }
-
-        function setAspectRatio(aspect) {
-            currentAspect = aspect;
             
-            videoContainer.className = `video-container ${aspect}`;
-            videoMask.className = `video-mask ${aspect}`;
-            
-            document.querySelectorAll('.control-panel .radio-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            const ratioText = aspect === 'landscape' ? '16:9 Landscape' : '9:16 Portrait';
-            showStatus('📐', `Aspect ratio: ${ratioText}`);
-        }
+            // --- EVENT LISTENERS SETUP ---
+            function setupEventListeners() {
+                modeVideoButton.addEventListener('click', () => setMode('video'));
+                modePhotoButton.addEventListener('click', () => setMode('photo'));
+                
+                aspectLandscapeButton.addEventListener('click', () => setAspectRatio('landscape'));
+                aspectPortraitButton.addEventListener('click', () => setAspectRatio('portrait'));
+                
+                formatWebmButton.addEventListener('click', () => setFormat('webm'));
+                formatMp4Button.addEventListener('click', () => setFormat('mp4'));
+                
+                videoButton.addEventListener('click', toggleRecording);
+                photoButton.addEventListener('click', takePhoto);
+                
+                downloadButton.addEventListener('click', downloadMedia);
+                retryButton.addEventListener('click', initCamera);
 
-        // Initialize when page loads
-        window.addEventListener('load', async () => {
-            console.log('Page loaded, initializing...');
-            
-            // Show loading state
-            showStatus('⏳', 'Loading application...', 1000);
-            
-            // Add entrance animations
-            setTimeout(() => {
-                document.querySelector('.header-controls').style.animation = 'slideDown 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
-                document.querySelector('.capture-interface').style.animation = 'slideUp 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
-            }, 100);
-            
-            // Initialize camera after a short delay
-            setTimeout(() => {
-                initCamera();
-            }, 500);
-        });
-
-        // Handle page unload
-        window.addEventListener('beforeunload', (e) => {
-            if (stream) {
-                stream.getTracks().forEach(track => {
-                    console.log('Stopping track:', track.kind);
-                    track.stop();
+                window.addEventListener('beforeunload', (e) => {
+                    if (stream) stream.getTracks().forEach(track => track.stop());
+                    if (isRecording) {
+                        e.preventDefault();
+                        e.returnValue = 'Recording in progress. Are you sure you want to leave?';
+                        return e.returnValue;
+                    }
                 });
             }
-            
-            if (isRecording) {
-                e.preventDefault();
-                e.returnValue = 'Recording in progress. Are you sure you want to leave?';
-                return e.returnValue;
-            }
+
+            // --- INITIALIZATION ---
+            setupEventListeners();
+            initCamera();
         });
-
-        // Handle visibility change
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden && isRecording) {
-                console.log('Page hidden while recording, stopping...');
-                stopRecording();
-            }
-        });
-
-        // Handle screen orientation changes
-        window.addEventListener('orientationchange', () => {
-            setTimeout(async () => {
-                if (isInitialized && stream) {
-                    try {
-                        const videoTrack = stream.getVideoTracks()[0];
-                        if (videoTrack) {
-                            await videoTrack.applyConstraints({
-                                width: { ideal: videoSettings.width },
-                                height: { ideal: videoSettings.height }
-                            });
-                            console.log('Reapplied constraints after orientation change');
-                        }
-                    } catch (error) {
-                        console.warn('Could not reapply constraints after orientation change:', error);
-                    }
-                }
-            }, 500);
-        });
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            // Don't trigger shortcuts if user is typing in an input
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                return;
-            }
-            
-            switch(e.code) {
-                case 'Space':
-                    e.preventDefault();
-                    if (currentMode === 'video') {
-                        toggleRecording();
-                    } else {
-                        takePhoto();
-                    }
-                    break;
-                case 'KeyV':
-                    e.preventDefault();
-                    setMode('video');
-                    break;
-                case 'KeyP':
-                    e.preventDefault();
-                    setMode('photo');
-                    break;
-                case 'KeyR':
-                    e.preventDefault();
-                    setAspectRatio(currentAspect === 'landscape' ? 'portrait' : 'landscape');
-                    break;
-                case 'KeyD':
-                    if (downloadButton.classList.contains('show')) {
-                        e.preventDefault();
-                        downloadMedia();
-                    }
-                    break;
-            }
-        });
-
-        // Add entrance animations styles
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideDown {
-                from {
-                    opacity: 0;
-                    transform: translateY(-30px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-            
-            @keyframes slideUp {
-                from {
-                    opacity: 0;
-                    transform: translateY(30px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Expose functions to global scope for onclick handlers
-        window.setMode = setMode;
-        window.toggleRecording = toggleRecording;
-        window.takePhoto = takePhoto;
-        window.downloadMedia = downloadMedia;
-        window.setFormat = setFormat;
-        window.setAspectRatio = setAspectRatio;
-        window.initCamera = initCamera;
     </script>
 </body>
 </html>
