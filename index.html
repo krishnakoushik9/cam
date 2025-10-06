@@ -97,6 +97,10 @@
             display: none;
         }
 
+        .preview-wrapper {
+            position: relative;
+        }
+
         .preview-container {
             position: relative;
             width: 100%;
@@ -238,9 +242,9 @@
 </head>
 <body>
     <header>
-        <h1>DL Project by H2,H8,J3</h1>
+        <h1>Facial Expression to Emoji Converter</h1>
         <p class="instructions">
-            Capture or upload a photo.
+            Capture or upload a photo to analyze your facial expression and discover your matching emoji!
         </p>
         <p class="privacy-notice">
             🔒 All processing happens in your browser. No images are uploaded or stored.
@@ -260,9 +264,11 @@
                     <button id="uploadBtn" aria-label="Upload image">📁 Upload</button>
                     <input type="file" id="fileInput" accept="image/jpeg,image/png" />
                 </div>
-                <div class="preview-container" id="previewContainer">
-                    <div class="placeholder">
-                        Select camera or upload an image to begin
+                <div class="preview-wrapper">
+                    <div class="preview-container" id="previewContainer">
+                        <div class="placeholder">
+                            Select camera or upload an image to begin
+                        </div>
                     </div>
                     <div class="scanning-overlay" id="scanningOverlay">
                         <div class="scanning-text">Analyzing facial expression...</div>
@@ -463,7 +469,12 @@
                         img.src = canvas.toDataURL();
                         img.onload = () => {
                             container.innerHTML = '';
-                            container.appendChild(img);
+                            const imgWrapper = document.createElement('div');
+                            imgWrapper.style.display = 'flex';
+                            imgWrapper.style.alignItems = 'center';
+                            imgWrapper.style.justifyContent = 'center';
+                            imgWrapper.appendChild(img);
+                            container.appendChild(imgWrapper);
                             
                             // Stop camera stream
                             stream.getTracks().forEach(track => track.stop());
@@ -507,7 +518,12 @@
                 img.onload = () => {
                     const container = document.getElementById('previewContainer');
                     container.innerHTML = '';
-                    container.appendChild(img);
+                    const imgWrapper = document.createElement('div');
+                    imgWrapper.style.display = 'flex';
+                    imgWrapper.style.alignItems = 'center';
+                    imgWrapper.style.justifyContent = 'center';
+                    imgWrapper.appendChild(img);
+                    container.appendChild(imgWrapper);
                     
                     // Analyze the uploaded image
                     analyzeFace(img);
