@@ -3,1202 +3,533 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video & Photo Recorder Pro</title>
+    <title>CSM 02 - H2,H8,J3 - DL Project</title>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/face-api.js/0.22.2/face-api.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        :root {
-            --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            --glass-border: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.05));
-            --glass-hover: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
-            --primary-blue: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --primary-red: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-            --success-green: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
-            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.1);
-            --shadow-medium: 0 12px 40px rgba(0, 0, 0, 0.15);
-            --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.25);
-        }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            height: 100vh;
-            overflow: hidden;
-            background: #000;
-            position: relative;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: white;
+            color: black;
+            line-height: 1.6;
         }
 
-        .video-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-            overflow: hidden;
-            border-radius: 0;
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        header {
+            text-align: center;
+            padding: 2rem 1rem;
+            border-bottom: 2px solid black;
         }
 
-        #videoElement {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
         }
 
-        .video-container.portrait {
-            width: 56.25vh; /* 9:16 aspect ratio based on viewport height */
-            height: 100vh;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 24px;
-            box-shadow: var(--shadow-strong);
-            border: 2px solid rgba(255, 255, 255, 0.1);
+        .instructions {
+            font-size: 0.95rem;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        .video-container.landscape {
-            width: 100vw;
-            height: 56.25vw; /* 16:9 aspect ratio based on viewport width */
-            max-height: 100vh;
-            top: 50%;
-            left: 0;
-            transform: translateY(-50%);
-            border-radius: 24px;
-            box-shadow: var(--shadow-strong);
-            border: 2px solid rgba(255, 255, 255, 0.1);
+        .privacy-notice {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            opacity: 0.7;
         }
 
-        .video-container.portrait #videoElement,
-        .video-container.landscape #videoElement {
-            border-radius: 22px;
+        main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
         }
 
-        .controls-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
+        .panel {
+            border: 2px solid black;
+            padding: 1.5rem;
+            min-height: 400px;
         }
 
-        .glass-panel {
-            position: absolute;
-            pointer-events: auto;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px) saturate(1.8);
-            border: 1px solid;
-            border-image: var(--glass-border) 1;
-            border-radius: 20px;
+        .panel h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .input-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            min-width: 120px;
+            padding: 0.75rem 1.5rem;
+            background: black;
             color: white;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: var(--shadow-soft);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .glass-panel::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-        }
-
-        .glass-panel::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-            border-radius: inherit;
-            pointer-events: none;
-        }
-
-        .glass-panel:hover {
-            background: var(--glass-hover);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-medium);
-        }
-
-        /* Header Controls */
-        .header-controls {
-            position: absolute;
-            top: 30px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            padding: 0 30px;
-            z-index: 100;
-        }
-
-        .mode-selector {
-            display: flex;
-            gap: 0;
-            align-items: center;
-            padding: 8px;
-            border-radius: 16px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px) saturate(1.8);
-            border: 1px solid;
-            border-image: var(--glass-border) 1;
-            box-shadow: var(--shadow-soft);
-        }
-
-        .mode-button {
-            background: transparent;
             border: none;
-            padding: 12px 24px;
-            color: rgba(255, 255, 255, 0.7);
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 12px;
-            position: relative;
-            font-family: inherit;
-        }
-
-        .mode-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: inherit;
-            opacity: 0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .mode-button.active {
-            color: white;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 4px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .mode-button:hover:not(.active)::before {
-            opacity: 1;
-        }
-
-        .control-group {
-            display: flex;
-            gap: 20px;
-        }
-
-        .control-panel {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            padding: 16px 24px;
-            border-radius: 16px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px) saturate(1.8);
-            border: 1px solid;
-            border-image: var(--glass-border) 1;
-            box-shadow: var(--shadow-soft);
-        }
-
-        .control-label {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            margin-right: 8px;
-        }
-
-        .radio-group {
-            display: flex;
-            gap: 8px;
-        }
-
-        .radio-button {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
-            backdrop-filter: blur(15px);
-            border: 1px solid;
-            border-image: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05)) 1;
-            border-radius: 12px;
-            padding: 8px 16px;
-            color: rgba(255, 255, 255, 0.8);
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 13px;
+            font-size: 1rem;
             font-weight: 500;
-            font-family: inherit;
+            transition: opacity 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            opacity: 0.8;
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .preview-container {
             position: relative;
-            overflow: hidden;
-        }
-
-        .radio-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            opacity: 0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .radio-button:hover::before {
-            opacity: 1;
-        }
-
-        .radio-button:hover {
-            transform: translateY(-1px);
-            color: white;
-        }
-
-        .radio-button.active {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
-            color: white;
-            border-image: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2)) 1;
-            transform: scale(1.05);
-        }
-
-        /* Quality Indicator */
-        .quality-indicator {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            padding: 12px 20px;
-            border-radius: 12px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px) saturate(1.8);
-            border: 1px solid;
-            border-image: var(--glass-border) 1;
-            box-shadow: var(--shadow-soft);
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 12px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            pointer-events: auto;
-        }
-
-        .quality-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success-green);
-            box-shadow: 0 0 10px rgba(81, 207, 102, 0.5);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-
-        /* Capture Interface */
-        .capture-interface {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            padding: 40px;
-            z-index: 1000;
-        }
-
-        .capture-buttons {
-            display: flex;
-            gap: 40px;
-            align-items: center;
-        }
-
-        .capture-button {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            background: var(--glass-bg);
-            backdrop-filter: blur(25px) saturate(1.8);
-            border: 2px solid;
-            border-image: var(--glass-border) 1;
+            width: 100%;
+            min-height: 300px;
+            border: 1px solid black;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            box-shadow: var(--shadow-medium);
-            pointer-events: auto;
+            background: white;
         }
 
-        .capture-button::before {
-            content: '';
+        .preview-container img, .preview-container video {
+            max-width: 100%;
+            max-height: 400px;
+            display: block;
+        }
+
+        .placeholder {
+            color: rgba(0, 0, 0, 0.4);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .scanning-overlay {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            animation: rotate 3s linear infinite;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .capture-button:hover::before {
-            opacity: 1;
-        }
-
-        @keyframes rotate {
-            to { transform: rotate(360deg); }
-        }
-
-        .capture-button::after {
-            content: '';
-            width: 40px;
-            height: 40px;
-            background: white;
-            border-radius: 50%;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            z-index: 2;
-        }
-
-        .capture-button:hover {
-            transform: scale(1.1);
-            box-shadow: var(--shadow-strong);
-        }
-
-        .capture-button:active {
-            transform: scale(1.05);
-        }
-
-        /* Photo Button */
-        .photo-button {
+            background: rgba(255, 255, 255, 0.9);
             display: none;
-        }
-        .photo-button.active {
-            display: flex;
-        }
-        .photo-button::after {
-            background: var(--primary-blue);
-            border-radius: 10px;
-            width: 36px;
-            height: 36px;
-        }
-        .photo-button:hover::after {
-            box-shadow: 0 0 30px rgba(102, 126, 234, 0.6);
-        }
-
-        /* Video Button */
-        .video-button {
-            display: none;
-        }
-        .video-button.active {
-            display: flex;
-        }
-        .video-button.recording {
-            background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(238, 90, 82, 0.1));
-            border-image: linear-gradient(135deg, rgba(255, 107, 107, 0.6), rgba(238, 90, 82, 0.3)) 1;
-            animation: recordPulse 2s infinite;
-        }
-        .video-button.recording::after {
-            border-radius: 10px;
-            width: 36px;
-            height: 36px;
-            background: var(--primary-red);
-        }
-
-        @keyframes recordPulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4); }
-            70% { box-shadow: 0 0 0 30px rgba(255, 107, 107, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
-        }
-
-        /* Timer Display */
-        .timer-display {
-            padding: 16px 32px;
-            border-radius: 20px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(25px) saturate(1.8);
-            border: 1px solid;
-            border-image: var(--glass-border) 1;
-            color: white;
-            font-family: 'JetBrains Mono', 'Courier New', monospace;
-            font-weight: 600;
-            font-size: 20px;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: var(--shadow-soft);
-            display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 12px;
-            pointer-events: auto;
+            justify-content: center;
+            z-index: 10;
         }
 
-        .timer-display.show {
-            opacity: 1;
-            transform: translateY(0);
+        .scanning-overlay.active {
+            display: flex;
         }
 
-        .timer-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--primary-red);
-            animation: blink 1s infinite;
+        .scanning-text {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
         }
 
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0.3; }
-        }
-
-        /* Action Button */
-        .action-button {
-            padding: 16px 32px;
-            border-radius: 16px;
-            background: var(--success-green);
-            color: white;
-            border: none;
-            font-size: 15px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: var(--shadow-soft);
-            display: none;
-            align-items: center;
-            gap: 10px;
+        .progress-bar {
+            width: 80%;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.1);
             position: relative;
             overflow: hidden;
-            pointer-events: auto;
         }
 
-        .action-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
+        .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s ease;
+            background: black;
+            width: 0%;
+            transition: width 0.1s linear;
         }
 
-        .action-button:hover::before {
-            left: 100%;
-        }
-
-        .action-button:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-medium);
-        }
-
-        .action-button.show {
-            display: flex;
-            animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Status Toast */
-        .status-toast {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px 32px;
-            border-radius: 16px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(25px) saturate(1.8);
-            border: 1px solid;
-            border-image: var(--glass-border) 1;
-            color: white;
-            font-weight: 500;
-            font-size: 15px;
-            z-index: 10000;
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.9);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            pointer-events: none;
-            box-shadow: var(--shadow-strong);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .status-toast.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        .status-icon {
-            font-size: 18px;
-        }
-
-        /* Flash Effect */
-        .flash-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.3) 100%);
-            z-index: 9999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.15s ease;
-        }
-
-        .flash-overlay.show {
-            opacity: 1;
-        }
-
-        /* Error State */
-        .error-state {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        .result-container {
             text-align: center;
-            color: white;
-            z-index: 100;
-            pointer-events: auto;
         }
 
-        .error-state h2 {
-            font-size: 24px;
-            margin-bottom: 16px;
-            color: #ff6b6b;
+        .emoji-display {
+            font-size: 8rem;
+            margin: 2rem 0;
+            animation: emojiPop 0.5s ease-out;
         }
 
-        .error-state p {
-            font-size: 16px;
-            opacity: 0.8;
-            margin-bottom: 24px;
+        @keyframes emojiPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
-        .retry-button {
-            padding: 12px 24px;
-            background: var(--primary-blue);
-            color: white;
-            border: none;
-            border-radius: 12px;
+        .expression-label {
+            font-size: 1.5rem;
             font-weight: 600;
-            cursor: pointer;
-            font-family: inherit;
+            margin-bottom: 0.5rem;
+            text-transform: capitalize;
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .header-controls {
-                top: 20px;
-                padding: 0 20px;
-                flex-direction: column;
-                gap: 15px;
-                align-items: center;
-            }
-            .control-group {
-                flex-direction: column;
-                gap: 12px;
-            }
-            .control-panel {
-                padding: 12px 20px;
-            }
-            .quality-indicator {
-                position: static;
-                order: -1;
-            }
-            .capture-interface {
-                padding: 30px 20px;
-            }
-            .capture-buttons {
-                gap: 30px;
-            }
-            .capture-button {
-                width: 80px;
-                height: 80px;
-            }
-            .capture-button::after {
-                width: 32px;
-                height: 32px;
-            }
-            .video-button.recording::after,
-            .photo-button::after {
-                width: 30px;
-                height: 30px;
-            }
+        .confidence {
+            font-size: 1rem;
+            opacity: 0.7;
         }
 
-        @media (max-width: 480px) {
-            .header-controls {
-                top: 15px;
-                padding: 0 15px;
-            }
-            .mode-button {
-                padding: 10px 20px;
-                font-size: 13px;
-            }
-            .control-panel {
-                padding: 10px 16px;
-            }
-            .capture-interface {
-                padding: 25px 15px;
-            }
-            .capture-button {
-                width: 70px;
-                height: 70px;
-            }
-            .timer-display {
-                padding: 12px 24px;
-                font-size: 18px;
-            }
+        .error-message {
+            color: black;
+            background: white;
+            border: 2px solid black;
+            padding: 1rem;
+            margin-top: 1rem;
+            text-align: center;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
+        .hidden {
             display: none;
+        }
+
+        @media (max-width: 768px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .emoji-display {
+                font-size: 5rem;
+            }
+        }
+
+        .loading-models {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-top: 2px solid black;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="video-container landscape" id="videoContainer">
-        <video id="videoElement" autoplay muted playsinline></video>
-    </div>
+    <header>
+        <h1>DL Project(Facial expression to emoji conversion)</h1>
+        <p class="instructions">
+            Capture or upload a photo to analyze your facial expression and discover your matching emoji!
+        </p>
+        <p class="privacy-notice">
+            🔒 All processing happens in your Laptop. No images are uploaded or stored.
+        </p>
+    </header>
 
-    <div class="flash-overlay" id="flashOverlay"></div>
-
-    <div class="controls-overlay">
-        <div class="header-controls">
-            <div class="mode-selector">
-                <button class="mode-button active" id="modeVideoButton">Video</button>
-                <button class="mode-button" id="modePhotoButton">Photo</button>
+    <main>
+        <div class="panel">
+            <h2>Input</h2>
+            <div id="loadingModels" class="loading-models">
+                <div class="loading-spinner"></div>
+                Loading face detection models...
             </div>
-
-            <div class="quality-indicator" id="qualityIndicator">
-                <div class="quality-dot"></div>
-                <span>Initializing...</span>
-            </div>
-
-            <div class="control-group">
-                <div class="control-panel" id="aspectRatioControls">
-                    <span class="control-label">Aspect</span>
-                    <div class="radio-group">
-                        <div class="radio-button active" id="aspectLandscapeButton">16:9</div>
-                        <div class="radio-button" id="aspectPortraitButton">9:16</div>
+            <div id="inputControls" class="hidden">
+                <div class="input-buttons">
+                    <button id="cameraBtn" aria-label="Capture from camera">📷 Camera</button>
+                    <button id="uploadBtn" aria-label="Upload image">📁 Upload</button>
+                    <input type="file" id="fileInput" accept="image/jpeg,image/png" />
+                </div>
+                <div class="preview-container" id="previewContainer">
+                    <div class="placeholder">
+                        Select camera or upload an image to begin
+                    </div>
+                    <div class="scanning-overlay" id="scanningOverlay">
+                        <div class="scanning-text">Analyzing facial expression...</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
                     </div>
                 </div>
-
-                <div class="control-panel" id="formatControls">
-                    <span class="control-label">Format</span>
-                    <div class="radio-group">
-                        <div class="radio-button active" id="formatWebmButton">WebM</div>
-                        <div class="radio-button" id="formatMp4Button">MP4</div>
-                    </div>
-                </div>
+                <div id="errorMessage" class="error-message hidden"></div>
             </div>
         </div>
 
-        <div class="capture-interface">
-            <div class="timer-display" id="timerDisplay">
-                <div class="timer-dot"></div>
-                <span>00:00</span>
+        <div class="panel">
+            <h2>Result</h2>
+            <div id="resultContainer" class="result-container hidden">
+                <div class="emoji-display" id="emojiDisplay"></div>
+                <div class="expression-label" id="expressionLabel"></div>
+                <div class="confidence" id="confidenceScore"></div>
             </div>
-
-            <div class="capture-buttons">
-                <div class="capture-button video-button active" id="videoButton"></div>
-                <div class="capture-button photo-button" id="photoButton"></div>
+            <div id="resultPlaceholder" class="placeholder">
+                Your emoji match will appear here
             </div>
-            
-            <button class="action-button" id="downloadButton">
-                <span>📥</span>
-                <span>Download</span>
-            </button>
         </div>
-
-        <div class="status-toast" id="statusToast">
-            <span class="status-icon" id="statusIcon"></span>
-            <span id="statusText">Initializing Camera...</span>
-        </div>
-
-        <div class="error-state" id="errorState" style="display: none;">
-            <h2>Camera Access Required</h2>
-            <p>Please allow camera and microphone access to use this application.</p>
-            <button class="retry-button" id="retryButton">Try Again</button>
-        </div>
-    </div>
+    </main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            let mediaRecorder;
-            let recordedChunks = [];
-            let stream;
-            let isRecording = false;
-            let startTime;
-            let timerInterval;
-            let currentFormat = 'webm';
-            let currentAspect = 'landscape';
-            let currentMode = 'video';
-            let videoSettings = {};
-            let capturedPhoto = null;
-            let isInitialized = false;
+        // Emoji mapping for each expression detected by face-api.js
+        const EXPRESSION_EMOJI_MAP = {
+            happy: '😊',
+            sad: '😢',
+            angry: '😠',
+            disgusted: '🤢',
+            surprised: '😮',
+            fearful: '😨',
+            neutral: '😐'
+        };
 
-            // DOM Element References
-            const videoElement = document.getElementById('videoElement');
-            const videoContainer = document.getElementById('videoContainer');
-            const videoButton = document.getElementById('videoButton');
-            const photoButton = document.getElementById('photoButton');
-            const statusToast = document.getElementById('statusToast');
-            const statusIcon = document.getElementById('statusIcon');
-            const statusText = document.getElementById('statusText');
-            const timerDisplay = document.getElementById('timerDisplay');
-            const downloadButton = document.getElementById('downloadButton');
-            const flashOverlay = document.getElementById('flashOverlay');
-            const qualityIndicator = document.getElementById('qualityIndicator');
-            const formatControls = document.getElementById('formatControls');
-            const errorState = document.getElementById('errorState');
-            
-            // Button References for Event Listeners
-            const modeVideoButton = document.getElementById('modeVideoButton');
-            const modePhotoButton = document.getElementById('modePhotoButton');
-            const aspectLandscapeButton = document.getElementById('aspectLandscapeButton');
-            const aspectPortraitButton = document.getElementById('aspectPortraitButton');
-            const formatWebmButton = document.getElementById('formatWebmButton');
-            const formatMp4Button = document.getElementById('formatMp4Button');
-            const retryButton = document.getElementById('retryButton');
+        let modelsLoaded = false;
+        let currentStream = null;
 
-            // --- CORE FUNCTIONS ---
-
-            async function initCamera() {
-                console.log('Initializing camera...');
-                errorState.style.display = 'none';
+        // Load face-api.js models from CDN
+        async function loadModels() {
+            try {
+                const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
                 
-                const supportIssues = checkBrowserSupport();
-                if (supportIssues.length > 0) {
-                    console.error('Browser support issues:', supportIssues);
-                    showStatus('❌', 'Browser not supported');
-                    showError('Browser Not Supported', 'Your browser doesn\'t support the required features for video recording.');
+                // Load required models: TinyFaceDetector (lightweight), FaceLandmarks, FaceExpressionRecognition
+                await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+                await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+                await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+                
+                modelsLoaded = true;
+                document.getElementById('loadingModels').classList.add('hidden');
+                document.getElementById('inputControls').classList.remove('hidden');
+            } catch (error) {
+                showError('Failed to load face detection models. Please refresh the page.');
+                console.error('Model loading error:', error);
+            }
+        }
+
+        // Analyze face and detect expression
+        async function analyzeFace(imageElement) {
+            if (!modelsLoaded) {
+                showError('Models not loaded yet. Please wait.');
+                return;
+            }
+
+            hideError();
+            showScanning();
+
+            try {
+                // Start 8-second progress animation
+                animateProgress(8000);
+
+                // Detect face with expressions using TinyFaceDetector (faster, good for client-side)
+                const detection = await faceapi
+                    .detectSingleFace(imageElement, new faceapi.TinyFaceDetectorOptions())
+                    .withFaceLandmarks()
+                    .withFaceExpressions();
+
+                // Wait for animation to complete (minimum 8 seconds)
+                await new Promise(resolve => setTimeout(resolve, 8000));
+
+                hideScanning();
+
+                if (!detection) {
+                    showError('No face detected. Please try another image with a clear face.');
                     return;
                 }
-                
-                showStatus('⏳', 'Requesting camera access...');
-                
-                try {
-                    if (stream) {
-                        stream.getTracks().forEach(track => track.stop());
-                    }
-                    
-                    const constraints = {
-                        video: {
-                            width: { ideal: 1920 },
-                            height: { ideal: 1080 },
-                            frameRate: { ideal: 30 },
-                            facingMode: 'user'
-                        },
-                        audio: {
-                            echoCancellation: true,
-                            noiseSuppression: true,
-                            autoGainControl: true
-                        }
-                    };
 
-                    console.log('Requesting media with constraints:', constraints);
-                    stream = await navigator.mediaDevices.getUserMedia(constraints);
-                    
-                    if (!stream || !stream.active) {
-                        throw new Error('Stream is not active');
-                    }
-                    
-                    videoElement.srcObject = stream;
-                    
-                    await new Promise((resolve, reject) => {
-                        videoElement.addEventListener('loadedmetadata', resolve, { once: true });
-                        videoElement.addEventListener('error', (err) => reject(new Error('Video element error')), { once: true });
-                        setTimeout(() => reject(new Error('Video load timeout')), 5000);
-                    });
-                    
-                    const videoTrack = stream.getVideoTracks()[0];
-                    if (!videoTrack) {
-                        throw new Error('No video track available');
-                    }
-                    
-                    videoSettings = videoTrack.getSettings();
-                    console.log('Initial video settings:', videoSettings);
-                    
-                    updateQualityIndicator();
-                    isInitialized = true;
-                    showStatus('✅', 'Camera ready');
-                    
-                } catch (error) {
-                    console.error('Camera initialization error:', error);
-                    handleCameraError(error);
-                }
-            }
-            
-            function toggleRecording() {
-                if (!isInitialized || !stream) {
-                    showStatus('❌', 'Camera not ready');
+                // Get the dominant expression (highest probability)
+                const expressions = detection.expressions;
+                const sortedExpressions = Object.entries(expressions).sort((a, b) => b[1] - a[1]);
+                const [dominantExpression, confidence] = sortedExpressions[0];
+
+                // Check confidence threshold
+                if (confidence < 0.3) {
+                    showError('Low confidence in expression detection. Please try another image.');
                     return;
                 }
-                if (!isRecording) {
-                    startRecording();
-                } else {
-                    stopRecording();
-                }
+
+                // Display result
+                displayResult(dominantExpression, confidence);
+
+            } catch (error) {
+                hideScanning();
+                showError('Error analyzing face. Please try again.');
+                console.error('Analysis error:', error);
             }
+        }
 
-            function startRecording() {
-                console.log('Starting recording...');
-                recordedChunks = [];
-                const mimeType = getSupportedMimeType();
-                const options = {
-                    mimeType: mimeType,
-                    videoBitsPerSecond: 8000000,
-                    audioBitsPerSecond: 128000
-                };
-
-                try {
-                    mediaRecorder = new MediaRecorder(stream, options);
-                    mediaRecorder.ondataavailable = (event) => {
-                        if (event.data && event.data.size > 0) {
-                            recordedChunks.push(event.data);
-                        }
-                    };
-                    mediaRecorder.onstop = () => {
-                        console.log('Recording stopped. Total chunks:', recordedChunks.length);
-                        const totalSize = recordedChunks.reduce((sum, chunk) => sum + chunk.size, 0);
-                        if (totalSize > 0) {
-                            downloadButton.classList.add('show');
-                            showStatus('✅', `Recording saved (${(totalSize / 1024 / 1024).toFixed(2)} MB)`);
-                        } else {
-                            showStatus('❌', 'Recording failed - no data captured');
-                        }
-                        timerDisplay.classList.remove('show');
-                    };
-                    mediaRecorder.onerror = (event) => {
-                        console.error('MediaRecorder error:', event.error);
-                        showStatus('❌', 'Recording error: ' + (event.error?.message || 'Unknown error'));
-                        isRecording = false;
-                        videoButton.classList.remove('recording');
-                        stopTimer();
-                    };
-                    mediaRecorder.onstart = () => {
-                        isRecording = true;
-                        videoButton.classList.add('recording');
-                        timerDisplay.classList.add('show');
-                        startTime = Date.now();
-                        startTimer();
-                    };
-
-                    mediaRecorder.start(1000);
-                    showStatus('🔴', 'Recording started');
-                    downloadButton.classList.remove('show');
-                } catch (error) {
-                    console.error('Error creating MediaRecorder:', error);
-                    showStatus('❌', 'Failed to start recording: ' + error.message);
-                }
-            }
-
-            function stopRecording() {
-                console.log('Stopping recording...');
-                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                    mediaRecorder.stop();
-                    showStatus('⏹️', 'Processing recording...');
-                }
-                isRecording = false;
-                videoButton.classList.remove('recording');
-                stopTimer();
-            }
-
-            function takePhoto() {
-                if (!isInitialized || !stream) {
-                    showStatus('❌', 'Camera not ready');
-                    return;
-                }
-                console.log('Taking photo...');
-                flashOverlay.classList.add('show');
-                setTimeout(() => flashOverlay.classList.remove('show'), 150);
-
-                const originalTransform = videoContainer.style.transform;
-                videoContainer.style.transform = `${originalTransform} scale(0.98)`;
-                setTimeout(() => videoContainer.style.transform = originalTransform, 100);
-
-                try {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = videoElement.videoWidth;
-                    canvas.height = videoElement.videoHeight;
-                    if (canvas.width === 0 || canvas.height === 0) throw new Error('Video dimensions not available');
-                    
-                    canvas.getContext('2d').drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                    canvas.toBlob((blob) => {
-                        if (blob && blob.size > 0) {
-                            capturedPhoto = blob;
-                            downloadButton.classList.add('show');
-                            showStatus('📸', `Photo captured (${Math.round(blob.size / 1024)} KB)`);
-                        } else {
-                            throw new Error('Failed to create photo blob');
-                        }
-                    }, 'image/png', 1.0);
-                } catch (error) {
-                    console.error('Photo capture error:', error);
-                    showStatus('❌', 'Photo capture failed: ' + error.message);
-                }
-            }
-
-            function downloadMedia() {
-                if (currentMode === 'video') downloadVideo();
-                else downloadPhoto();
-            }
+        // Animate progress bar over specified duration
+        function animateProgress(duration) {
+            const fill = document.getElementById('progressFill');
+            const startTime = Date.now();
             
-            // --- UI AND STATE MANAGEMENT ---
-
-            function setMode(mode) {
-                if (currentMode === mode) return;
-                currentMode = mode;
+            function update() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min((elapsed / duration) * 100, 100);
+                fill.style.width = progress + '%';
                 
-                document.querySelectorAll('.mode-button').forEach(btn => btn.classList.remove('active'));
-                
-                if (mode === 'video') {
-                    modeVideoButton.classList.add('active');
-                    videoButton.classList.add('active');
-                    photoButton.classList.remove('active');
-                    formatControls.style.opacity = '1';
-                    formatControls.style.pointerEvents = 'auto';
-                } else {
-                    modePhotoButton.classList.add('active');
-                    photoButton.classList.add('active');
-                    videoButton.classList.remove('active');
-                    formatControls.style.opacity = '0.5';
-                    formatControls.style.pointerEvents = 'none';
-                }
-                downloadButton.classList.remove('show');
-                showStatus('🎥', `${mode.charAt(0).toUpperCase() + mode.slice(1)} mode active`);
-            }
-
-            function setAspectRatio(aspect) {
-                if (currentAspect === aspect) return;
-                currentAspect = aspect;
-                videoContainer.className = `video-container ${aspect}`;
-                
-                // This selector now works because the ID is present in the HTML
-                document.querySelectorAll('#aspectRatioControls .radio-button').forEach(btn => btn.classList.remove('active'));
-                if (aspect === 'landscape') {
-                    aspectLandscapeButton.classList.add('active');
-                } else {
-                    aspectPortraitButton.classList.add('active');
-                }
-                
-                const ratioText = aspect === 'landscape' ? '16:9 Landscape' : '9:16 Portrait';
-                showStatus('📐', `Aspect ratio: ${ratioText}`);
-            }
-
-            function setFormat(format) {
-                if (currentFormat === format) return;
-                currentFormat = format;
-                
-                document.querySelectorAll('#formatControls .radio-button').forEach(btn => btn.classList.remove('active'));
-                if (format === 'webm') {
-                    formatWebmButton.classList.add('active');
-                } else {
-                    formatMp4Button.classList.add('active');
-                }
-                
-                showStatus('🎛️', `Format set to ${format.toUpperCase()}`);
-            }
-            
-            // --- HELPER AND UTILITY FUNCTIONS ---
-
-            function checkBrowserSupport() {
-                const issues = [];
-                if (!navigator.mediaDevices?.getUserMedia) issues.push('getUserMedia');
-                if (!window.MediaRecorder) issues.push('MediaRecorder');
-                if (!window.URL?.createObjectURL) issues.push('URL API');
-                return issues;
-            }
-
-            function getSupportedMimeType() {
-                const preferredType = currentFormat === 'mp4' ? 'video/mp4' : 'video/webm';
-                const fallbackType = currentFormat === 'mp4' ? 'video/webm' : 'video/mp4';
-
-                if (MediaRecorder.isTypeSupported(preferredType)) {
-                    console.log(`Using preferred MIME type: ${preferredType}`);
-                    return preferredType;
-                }
-                console.warn(`Preferred MIME type ${preferredType} not supported. Trying fallback.`);
-                if (MediaRecorder.isTypeSupported(fallbackType)) {
-                    console.log(`Using fallback MIME type: ${fallbackType}`);
-                    return fallbackType;
-                }
-                console.error('Neither WebM nor MP4 are supported.');
-                showStatus('❌', 'No supported video format found.');
-                return '';
-            }
-            
-            function downloadVideo() {
-                if (!recordedChunks || recordedChunks.length === 0) {
-                    showStatus('❌', 'No recording available');
-                    return;
-                }
-                try {
-                    const mimeType = recordedChunks[0].type || 'video/webm';
-                    const extension = currentFormat;
-                    const blob = new Blob(recordedChunks, { type: mimeType });
-
-                    if (blob.size === 0) {
-                        showStatus('❌', 'Recording is empty');
-                        return;
-                    }
-
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-                    a.href = url;
-                    a.download = `video_${timestamp}.${extension}`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    setTimeout(() => URL.revokeObjectURL(url), 100);
-                    
-                    showStatus('📥', 'Video download started');
-                    downloadButton.classList.remove('show');
-                    recordedChunks = [];
-                } catch (error) {
-                    console.error('Download error:', error);
-                    showStatus('❌', 'Download failed: ' + error.message);
-                }
-            }
-
-            function downloadPhoto() {
-                if (!capturedPhoto) {
-                    showStatus('❌', 'No photo available');
-                    return;
-                }
-                try {
-                    const url = URL.createObjectURL(capturedPhoto);
-                    const a = document.createElement('a');
-                    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-                    a.href = url;
-                    a.download = `photo_${timestamp}.png`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    setTimeout(() => URL.revokeObjectURL(url), 100);
-
-                    showStatus('📥', 'Photo download started');
-                    downloadButton.classList.remove('show');
-                    capturedPhoto = null;
-                } catch (error) {
-                    console.error('Photo download error:', error);
-                    showStatus('❌', 'Photo download failed: ' + error.message);
+                if (progress < 100) {
+                    requestAnimationFrame(update);
                 }
             }
             
-            function handleCameraError(error) {
-                let message = 'Camera access failed';
-                let suggestion = 'Please check permissions and try again.';
-                if (error.name === 'NotAllowedError') {
-                    message = 'Permission denied';
-                    suggestion = 'Please allow camera access in your browser settings.';
-                } else if (error.name === 'NotFoundError') {
-                    message = 'No camera found';
-                    suggestion = 'Please connect a camera and try again.';
-                } else if (error.name === 'NotReadableError') {
-                    message = 'Camera is busy';
-                    suggestion = 'Close other apps using the camera and try again.';
-                }
-                showStatus('❌', message);
-                showError(message, suggestion);
-                qualityIndicator.innerHTML = `<div class="quality-dot" style="background: #ff6b6b; animation: none;"></div><span>Error</span>`;
-            }
+            update();
+        }
 
-            function showError(title, message) {
-                errorState.querySelector('h2').textContent = title;
-                errorState.querySelector('p').textContent = message;
-                errorState.style.display = 'block';
-            }
-
-            function updateQualityIndicator() {
-                const { width, height } = videoSettings;
-                qualityIndicator.querySelector('span').textContent = `Ready (${width}x${height})`;
-            }
-
-            function showStatus(icon, message, duration = 3000) {
-                statusIcon.textContent = icon;
-                statusText.textContent = message;
-                statusToast.classList.add('show');
-                setTimeout(() => statusToast.classList.remove('show'), duration);
-            }
-
-            function startTimer() {
-                timerInterval = setInterval(() => {
-                    const elapsed = Date.now() - startTime;
-                    const minutes = Math.floor(elapsed / 60000);
-                    const seconds = Math.floor((elapsed % 60000) / 1000);
-                    timerDisplay.querySelector('span').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                }, 1000);
-            }
-
-            function stopTimer() {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
+        // Display emoji result
+        function displayResult(expression, confidence) {
+            const emoji = EXPRESSION_EMOJI_MAP[expression] || '🤔';
             
-            // --- EVENT LISTENERS SETUP ---
-            function setupEventListeners() {
-                modeVideoButton.addEventListener('click', () => setMode('video'));
-                modePhotoButton.addEventListener('click', () => setMode('photo'));
-                
-                aspectLandscapeButton.addEventListener('click', () => setAspectRatio('landscape'));
-                aspectPortraitButton.addEventListener('click', () => setAspectRatio('portrait'));
-                
-                formatWebmButton.addEventListener('click', () => setFormat('webm'));
-                formatMp4Button.addEventListener('click', () => setFormat('mp4'));
-                
-                videoButton.addEventListener('click', toggleRecording);
-                photoButton.addEventListener('click', takePhoto);
-                
-                downloadButton.addEventListener('click', downloadMedia);
-                retryButton.addEventListener('click', initCamera);
+            document.getElementById('emojiDisplay').textContent = emoji;
+            document.getElementById('expressionLabel').textContent = expression;
+            document.getElementById('confidenceScore').textContent = 
+                `${(confidence * 100).toFixed(1)}% confidence`;
+            
+            document.getElementById('resultPlaceholder').classList.add('hidden');
+            document.getElementById('resultContainer').classList.remove('hidden');
+        }
 
-                window.addEventListener('beforeunload', (e) => {
-                    if (stream) stream.getTracks().forEach(track => track.stop());
-                    if (isRecording) {
-                        e.preventDefault();
-                        e.returnValue = 'Recording in progress. Are you sure you want to leave?';
-                        return e.returnValue;
-                    }
+        // Show/hide scanning overlay
+        function showScanning() {
+            document.getElementById('scanningOverlay').classList.add('active');
+            document.getElementById('progressFill').style.width = '0%';
+        }
+
+        function hideScanning() {
+            document.getElementById('scanningOverlay').classList.remove('active');
+        }
+
+        // Error handling
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.classList.remove('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').classList.add('hidden');
+        }
+
+        // Camera capture
+        document.getElementById('cameraBtn').addEventListener('click', async () => {
+            try {
+                // Stop any existing stream
+                if (currentStream) {
+                    currentStream.getTracks().forEach(track => track.stop());
+                }
+
+                // Request camera access
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'user' } 
                 });
+                currentStream = stream;
+
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.autoplay = true;
+                video.playsInline = true;
+
+                const container = document.getElementById('previewContainer');
+                container.innerHTML = '';
+                container.appendChild(video);
+
+                // Wait for video to be ready, then capture frame
+                video.addEventListener('loadedmetadata', () => {
+                    setTimeout(() => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(video, 0, 0);
+
+                        // Convert to image and analyze
+                        const img = new Image();
+                        img.src = canvas.toDataURL();
+                        img.onload = () => {
+                            container.innerHTML = '';
+                            container.appendChild(img);
+                            
+                            // Stop camera stream
+                            stream.getTracks().forEach(track => track.stop());
+                            currentStream = null;
+
+                            // Analyze the captured image
+                            analyzeFace(img);
+                        };
+                    }, 100);
+                });
+
+            } catch (error) {
+                if (error.name === 'NotAllowedError') {
+                    showError('Camera permission denied. Please enable camera access.');
+                } else if (error.name === 'NotFoundError') {
+                    showError('No camera found on this device.');
+                } else {
+                    showError('Error accessing camera. Please try uploading an image instead.');
+                }
+                console.error('Camera error:', error);
+            }
+        });
+
+        // File upload
+        document.getElementById('uploadBtn').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
+                showError('Please upload a JPG or PNG image.');
+                return;
             }
 
-            // --- INITIALIZATION ---
-            setupEventListeners();
-            initCamera();
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const container = document.getElementById('previewContainer');
+                    container.innerHTML = '';
+                    container.appendChild(img);
+                    
+                    // Analyze the uploaded image
+                    analyzeFace(img);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Initialize: Load models when page loads
+        window.addEventListener('load', () => {
+            if (typeof faceapi === 'undefined') {
+                showError('Face detection library failed to load. Please refresh the page.');
+                return;
+            }
+            loadModels();
+        });
+
+        // Cleanup camera stream on page unload
+        window.addEventListener('beforeunload', () => {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
         });
     </script>
 </body>
