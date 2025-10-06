@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facial Expression to Emoji Converter</title>
+    <title>(DL Project)</title>
     <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <style>
         * {
@@ -130,30 +130,124 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 10;
+            backdrop-filter: blur(2px);
         }
 
         .scanning-overlay.active {
             display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .scanning-text {
             font-size: 1.1rem;
-            margin-bottom: 1rem;
+            margin-bottom: 2rem;
             font-weight: 500;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Scanning line animation */
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, black, transparent);
+            animation: scanMove 2s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes scanMove {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+
+        /* Circular radar scanner */
+        .radar-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin-bottom: 2rem;
+        }
+
+        .radar-circle {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid black;
+            border-radius: 50%;
+            opacity: 0.2;
+        }
+
+        .radar-circle:nth-child(2) {
+            width: 66%;
+            height: 66%;
+            top: 17%;
+            left: 17%;
+        }
+
+        .radar-circle:nth-child(3) {
+            width: 33%;
+            height: 33%;
+            top: 33.5%;
+            left: 33.5%;
+        }
+
+        .radar-sweep {
+            position: absolute;
+            width: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, black);
+            top: 50%;
+            left: 50%;
+            transform-origin: 0% 50%;
+            animation: radarSweep 2s linear infinite;
+        }
+
+        @keyframes radarSweep {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .radar-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: black;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: radarPing 2s ease-in-out infinite;
+        }
+
+        @keyframes radarPing {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.5; }
         }
 
         .progress-bar {
             width: 80%;
-            height: 4px;
+            height: 8px;
             background: rgba(0, 0, 0, 0.1);
             position: relative;
             overflow: hidden;
+            border-radius: 4px;
         }
 
         .progress-fill {
@@ -161,6 +255,79 @@
             background: black;
             width: 0%;
             transition: width 0.1s linear;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.5), 
+                transparent);
+            animation: shimmer 1s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-percentage {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 0.7;
+        }
+
+        /* Corner frame animation */
+        .corner-frame {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 3px solid black;
+        }
+
+        .corner-frame.top-left {
+            top: 20px;
+            left: 20px;
+            border-right: none;
+            border-bottom: none;
+            animation: cornerPulse 2s ease-in-out infinite;
+        }
+
+        .corner-frame.top-right {
+            top: 20px;
+            right: 20px;
+            border-left: none;
+            border-bottom: none;
+            animation: cornerPulse 2s ease-in-out infinite 0.5s;
+        }
+
+        .corner-frame.bottom-left {
+            bottom: 20px;
+            left: 20px;
+            border-right: none;
+            border-top: none;
+            animation: cornerPulse 2s ease-in-out infinite 1s;
+        }
+
+        .corner-frame.bottom-right {
+            bottom: 20px;
+            right: 20px;
+            border-left: none;
+            border-top: none;
+            animation: cornerPulse 2s ease-in-out infinite 1.5s;
+        }
+
+        @keyframes cornerPulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
         }
 
         .result-container {
@@ -271,10 +438,23 @@
                         </div>
                     </div>
                     <div class="scanning-overlay" id="scanningOverlay">
+                        <div class="corner-frame top-left"></div>
+                        <div class="corner-frame top-right"></div>
+                        <div class="corner-frame bottom-left"></div>
+                        <div class="corner-frame bottom-right"></div>
+                        <div class="scan-line"></div>
+                        <div class="radar-container">
+                            <div class="radar-circle"></div>
+                            <div class="radar-circle"></div>
+                            <div class="radar-circle"></div>
+                            <div class="radar-sweep"></div>
+                            <div class="radar-dot"></div>
+                        </div>
                         <div class="scanning-text">Analyzing facial expression...</div>
                         <div class="progress-bar">
                             <div class="progress-fill" id="progressFill"></div>
                         </div>
+                        <div class="progress-percentage" id="progressPercentage">0%</div>
                     </div>
                 </div>
                 <div id="errorMessage" class="error-message hidden"></div>
@@ -383,12 +563,14 @@
         // Animate progress bar over specified duration
         function animateProgress(duration) {
             const fill = document.getElementById('progressFill');
+            const percentage = document.getElementById('progressPercentage');
             const startTime = Date.now();
             
             function update() {
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min((elapsed / duration) * 100, 100);
                 fill.style.width = progress + '%';
+                percentage.textContent = Math.floor(progress) + '%';
                 
                 if (progress < 100) {
                     requestAnimationFrame(update);
@@ -415,6 +597,7 @@
         function showScanning() {
             document.getElementById('scanningOverlay').classList.add('active');
             document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressPercentage').textContent = '0%';
         }
 
         function hideScanning() {
