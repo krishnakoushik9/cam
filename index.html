@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSM 02 - H2,H8,J3 - DL Project</title>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/face-api.js/0.22.2/face-api.min.js"></script>
+    <title>Facial Expression to Emoji Converter</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -238,12 +238,12 @@
 </head>
 <body>
     <header>
-        <h1>DL Project(Facial expression to emoji conversion)</h1>
+        <h1>DL Project by H2,H8,J3</h1>
         <p class="instructions">
-            Capture or upload a photo to analyze your facial expression and discover your matching emoji!
+            Capture or upload a photo.
         </p>
         <p class="privacy-notice">
-            🔒 All processing happens in your Laptop. No images are uploaded or stored.
+            🔒 All processing happens in your browser. No images are uploaded or stored.
         </p>
     </header>
 
@@ -306,7 +306,8 @@
         // Load face-api.js models from CDN
         async function loadModels() {
             try {
-                const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+                // Using jsdelivr CDN for face-api models
+                const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights/';
                 
                 // Load required models: TinyFaceDetector (lightweight), FaceLandmarks, FaceExpressionRecognition
                 await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
@@ -317,7 +318,7 @@
                 document.getElementById('loadingModels').classList.add('hidden');
                 document.getElementById('inputControls').classList.remove('hidden');
             } catch (error) {
-                showError('Failed to load face detection models. Please refresh the page.');
+                showError('Failed to load face detection models. Please refresh the page. Error: ' + error.message);
                 console.error('Model loading error:', error);
             }
         }
